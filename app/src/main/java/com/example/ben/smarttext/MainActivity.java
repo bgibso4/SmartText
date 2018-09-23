@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.ContactsContract;
+
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         List<TextMessage> texts = textMessageDAO.getMessages();
 
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
+        Button contactsButton = findViewById((R.id.contactsButton));
+
 
         Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
         boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
@@ -64,6 +68,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, CreateNewText.class));
             }
         });
+
+        contactsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, ContactsScreen.class));
+            }
+        });
+
+
+
 
 
         final Handler handler = new Handler();
