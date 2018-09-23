@@ -4,12 +4,12 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -22,6 +22,13 @@ public class ContactsScreen extends AppCompatActivity {
 
     // Request code for READ_CONTACTS. It can be any number > 0.
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+
+    private static final String[] PROJECTION = new String[] {
+            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Phone.NUMBER
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +51,8 @@ public class ContactsScreen extends AppCompatActivity {
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
-            List<String> contacts = getContactNames();
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, contacts);
+            List<Contact> contacts = getContactNames();
+            ContactAdapter adapter = new ContactAdapter(this, 0, contacts);
             lstNames.setAdapter(adapter);
         }
     }
@@ -68,25 +75,22 @@ public class ContactsScreen extends AppCompatActivity {
      *
      * @return a list of names.
      */
-    private List<String> getContactNames() {
-        List<String> contacts = new ArrayList<>();
-        // Get the ContentResolver
+    private List<Contact> getContactNames() {
+        List<Contact> contacts = new ArrayList<>();
         ContentResolver cr = getContentResolver();
-        // Get the Cursor of all the contacts
-        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PROJECTION, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME+" ASC");
+        if (cursor != null) {
+            try {
+                final int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                final int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
 
-        // Move the cursor to first. Also check whether the cursor is empty or not.
-        if (cursor.moveToFirst()) {
-            // Iterate through the cursor
-            do {
-                // Get the contacts name
-                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                contacts.add(name);
-            } while (cursor.moveToNext());
+                while (cursor.moveToNext()) {
+                    contacts.add(new Contact(cursor.getString(nameIndex), cursor.getString(numberIndex)));
+                }
+            } finally {
+                cursor.close();
+            }
         }
-        // Close the cursor
-        cursor.close();
-
         return contacts;
     }
 }
