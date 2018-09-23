@@ -22,4 +22,7 @@ public interface TextMessageDAO {
 
     @Query("Select * FROM TextMessages")
     public List<TextMessage> getMessages();
+
+    @Query("Select * FROM TextMessages ")
+    public List<TextMessage> getMessagesToSend();
 }
