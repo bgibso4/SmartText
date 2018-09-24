@@ -69,6 +69,9 @@ public class TextMessage {
     public Date getDate(){
         return date;
     }
+    public long timeAway(){
+        return date.getTime() - new Date().getTime();
+    }
 
     public void setDate(Date d){
         this.date = d;
@@ -141,7 +144,7 @@ public class TextMessage {
         }
         else{
             SmsManager sms = SmsManager.getDefault();
-            sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
+            //sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
         }
     }
     public void requestMessageServices(Context context){

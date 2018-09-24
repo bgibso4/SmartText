@@ -12,6 +12,8 @@ import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 
@@ -25,30 +27,52 @@ public class MainActivity extends AppCompatActivity {
     private Context context;
     AppDatabase database;
     SMSJobService service;
+    RecyclerView pendingMessageView;
+    LinearLayoutManager messageLayoutManager;
+    MessageLayoutAdapter messageAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.context = this;
-        //service = new SMSJobService(context);
+
 
         database = Room.databaseBuilder(this, AppDatabase.class, "db-test")
                 .allowMainThreadQueries() //TODO get rid of main thread queries
                 .build();
-
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
-//
 //        TextMessage textMessage = new TextMessage();
-//        textMessage.setUid(3);
-//        textMessage.setName("Bengy");
-//        textMessage.setMessage("Welcome to the jungle");
+//        textMessage.setUid(5);
+//        textMessage.setName("Luke");
+//        textMessage.setMessage("Asuh Duh");
 //        textMessage.setPhoneNumber("5197028412");
 //        textMessage.setDate(new Date());
-
-        //textMessageDAO.insert(textMessage);
-
+//
+//        textMessageDAO.insert(textMessage);
         List<TextMessage> texts = textMessageDAO.getMessages();
+
+
+
+        pendingMessageView = findViewById(R.id.pendingMessageList);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        //pendingMessageView.setHasFixedSize(true);
+
+
+        // use a linear layout manager
+        messageLayoutManager = new LinearLayoutManager(this);
+
+        pendingMessageView.setLayoutManager(messageLayoutManager);
+
+        // specify an adapter (see also next example)
+        messageAdapter = new MessageLayoutAdapter(texts);
+        pendingMessageView.setAdapter(messageAdapter);
+
+
+
 
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
         Button contactsButton = findViewById((R.id.contactsButton));
