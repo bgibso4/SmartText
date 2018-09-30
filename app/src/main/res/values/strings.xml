@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">SmartText</string>
     <string name="title_activity_contacts_screen">ContactsScreen</string>
+    <string name="action_favorite">favorite</string>
+    <string name="action_settings">settings</string>
+    <string name="search_title">search</string>
 </resources>
