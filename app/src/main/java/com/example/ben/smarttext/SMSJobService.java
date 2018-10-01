@@ -11,9 +11,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -30,6 +32,7 @@ public class SMSJobService extends JobService {
 
     private static final int PERMISSION_REQUEST_SMS=0;
     private View mLayout;
+    private Context context;
 
     private BroadcastReceiver sendBroadcastReceiver;
     private BroadcastReceiver deliveryBroadcastReceiver;
@@ -37,45 +40,8 @@ public class SMSJobService extends JobService {
     String  DELIVERED = "SMS_DELIVERED";
 
 
-    public SMSJobService() {
-
-        sendBroadcastReceiver = new BroadcastReceiver() {
-
-            public void onReceive(Context arg0, Intent arg1) {
-                switch (getResultCode()) {
-                    case Activity.RESULT_OK:
-                        Toast.makeText(getBaseContext(), "SMS Sent", Toast.LENGTH_SHORT).show();
-                        break;
-                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-                        Toast.makeText(getBaseContext(), "Generic failure", Toast.LENGTH_SHORT).show();
-                        break;
-                    case SmsManager.RESULT_ERROR_NO_SERVICE:
-                        Toast.makeText(getBaseContext(), "No service", Toast.LENGTH_SHORT).show();
-                        break;
-                    case SmsManager.RESULT_ERROR_NULL_PDU:
-                        Toast.makeText(getBaseContext(), "Null PDU", Toast.LENGTH_SHORT).show();
-                        break;
-                    case SmsManager.RESULT_ERROR_RADIO_OFF:
-                        Toast.makeText(getBaseContext(), "Radio off", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-        };
-
-        deliveryBroadcastReceiver = new BroadcastReceiver() {
-            public void onReceive(Context arg0, Intent arg1) {
-                switch (getResultCode()) {
-                    case Activity.RESULT_OK:
-                        Toast.makeText(getBaseContext(), "SMS Delivered", Toast.LENGTH_SHORT).show();
-                        break;
-                    case Activity.RESULT_CANCELED:
-                        Toast.makeText(getBaseContext(), "SMS not delivered", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-        };
-        registerReceiver(deliveryBroadcastReceiver, new IntentFilter(DELIVERED));
-        registerReceiver(sendBroadcastReceiver, new IntentFilter(SENT));
+    public SMSJobService(Context c) {
+        context = c;
 
     }
 
@@ -102,25 +68,92 @@ public class SMSJobService extends JobService {
         return needsReschedule;
     }
 
-    public void setText(String phoneNumber, String message){
-        this.phoneNumber= phoneNumber;
-        this.message= message;
-    }
 
     public void sendSMS(String phoneNumber, String message){
-        PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, new Intent(SENT), 0);
-        PendingIntent deliveredPI = PendingIntent.getBroadcast(this, 0, new Intent(DELIVERED), 0);
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
+        String  SENT = "SMS_SENT";
+        String  DELIVERED = "SMS_DELIVERED";
+
+        PendingIntent sentPI = PendingIntent.getBroadcast(context, 0, new Intent(SENT), 0);
+
+        PendingIntent deliveredPI = PendingIntent.getBroadcast(context, 0, new Intent(DELIVERED), 0);
+        //---when the SMS has been sent---
+        context.registerReceiver(new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context arg0, Intent arg1) {
+                switch (getResultCode())
+                {
+                    case Activity.RESULT_OK:
+                        Toast.makeText(getBaseContext(), "SMS sent",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                        Toast.makeText(getBaseContext(), "Generic failure",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_NO_SERVICE:
+                        Toast.makeText(getBaseContext(), "No service",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_NULL_PDU:
+                        Toast.makeText(getBaseContext(), "Null PDU",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_RADIO_OFF:
+                        Toast.makeText(getBaseContext(), "Radio off",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        }, new IntentFilter(SENT));
+
+        //---when the SMS has been delivered---
+        context.registerReceiver(new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context arg0, Intent arg1) {
+                switch (getResultCode())
+                {
+                    case Activity.RESULT_OK:
+                        Toast.makeText(getBaseContext(), "SMS delivered",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Toast.makeText(getBaseContext(), "SMS not delivered",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        }, new IntentFilter(DELIVERED));
+        int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS);
+
         if(permissionCheck!= PackageManager.PERMISSION_GRANTED){
             Log.e("Message", "Message was not sent");
-            //requestTextPermission();
+            //onRequestPermissionsResult(,Manifest.permission.SEND_SMS);
+            requestMessageServices();
+
         }
         else{
             SmsManager sms = SmsManager.getDefault();
             sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
         }
+
+//        PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, new Intent(SENT), 0);
+//        PendingIntent deliveredPI = PendingIntent.getBroadcast(this, 0, new Intent(DELIVERED), 0);
+//        Intent
+//        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
+//        if(permissionCheck!= PackageManager.PERMISSION_GRANTED){
+//            Log.e("Message", "Message was not sent");
+//            //requestTextPermission();
+//        }
+//        else{
+//            SmsManager sms = SmsManager.getDefault();
+//            sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
+//        }
         //PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
 
+    }
+    public void requestMessageServices(){
+        ActivityCompat.requestPermissions((Activity) context,
+                new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SMS);
     }
 
 
@@ -128,7 +161,7 @@ public class SMSJobService extends JobService {
                                            int[] grantResults) {
         // BEGIN_INCLUDE(onRequestPermissionsResult)
         if (requestCode == PERMISSION_REQUEST_SMS) {
-            // Request for camera permission.
+            // Request for SMS permission.
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission has been granted. Start camera preview Activity.
                 Snackbar.make(mLayout, "Camera permission was granted. Starting preview.",

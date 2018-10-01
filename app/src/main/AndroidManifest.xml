@@ -25,8 +25,18 @@
         <service
             android:name=".SMSJobService"
             android:enabled="true"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"></service>
+        <service android:name=".SendingService"
+            android:enabled="true"></service>
+
+        <receiver android:name="MessageSenderRestartReceiver"
+            android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:label="SendMessagesServiceWhenStopped">
+
+        </receiver>
+
 
         <activity
             android:name=".ContactsScreen"
