@@ -24,10 +24,6 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
         this.contactList = contactList;
     }
 
-//   objectspublic ContactAdapter(@NonNull Context context, ArrayList<Contact> contactList) {
-//        super(context, 0 , contactList);
-//    }
-
 
     @NonNull
     @Override
@@ -42,5 +38,11 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
         name.setText(currentContact.getName());
 
         return listItem;
+    }
+
+    public void updateContacts(List<Contact> contactList){
+        this.contactList.clear();
+        this.contactList.addAll(contactList);
+        this.notifyDataSetChanged();
     }
 }

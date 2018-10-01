@@ -9,11 +9,10 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -22,6 +21,9 @@ import java.util.List;
 public class ContactsScreen extends AppCompatActivity {
     // The ListView
     private ListView lstNames;
+    private SearchView searchContacts;
+    private List<Contact> contacts, queriedContacts;
+    private ContactAdapter adapter;
 
     // Request code for READ_CONTACTS. It can be any number > 0.
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
@@ -32,19 +34,42 @@ public class ContactsScreen extends AppCompatActivity {
             ContactsContract.CommonDataKinds.Phone.NUMBER
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts_screen);
 
+        searchContacts = findViewById(R.id.searchContacts);
 
         // Find the list view
         this.lstNames = findViewById(R.id.lstNames);
 
         // Read and show the contacts
         showContacts();
+
+        // perform set on query text listener event
+        searchContacts.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                queriedContacts = new ArrayList<>();
+                for(Contact c: contacts){
+                    if(c.getName().startsWith(query)){
+                        queriedContacts.add(c);
+                    }
+                }
+                adapter.updateContacts(queriedContacts);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                return false;
+            }
+        });
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,8 +88,8 @@ public class ContactsScreen extends AppCompatActivity {
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
-            List<Contact> contacts = getContactNames();
-            ContactAdapter adapter = new ContactAdapter(this, 0, contacts);
+            contacts = getContactNames();
+            adapter = new ContactAdapter(this, 0, contacts);
             lstNames.setAdapter(adapter);
         }
     }
