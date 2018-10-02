@@ -53,8 +53,8 @@ public class ContactsScreen extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 queriedContacts = new ArrayList<>();
                 for(Contact c: contacts){
-                    if(c.getName().startsWith(query)){
-                        queriedContacts.add(c);
+                    if(c.getName().toUpperCase().startsWith(query.toUpperCase())){
+                        queriedContacts.add(new Contact(c));
                     }
                 }
                 adapter.updateContacts(queriedContacts);
@@ -63,7 +63,13 @@ public class ContactsScreen extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
+                queriedContacts = new ArrayList<>();
+                for(Contact c: contacts){
+                    if(c.getName().toUpperCase().startsWith(newText.toUpperCase())){
+                        queriedContacts.add(new Contact(c));
+                    }
+                }
+                adapter.updateContacts(queriedContacts);
                 return false;
             }
         });
@@ -89,7 +95,7 @@ public class ContactsScreen extends AppCompatActivity {
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
             contacts = getContactNames();
-            adapter = new ContactAdapter(this, 0, contacts);
+            adapter = new ContactAdapter(this, 0, new ArrayList<>(contacts));
             lstNames.setAdapter(adapter);
         }
     }
@@ -115,7 +121,7 @@ public class ContactsScreen extends AppCompatActivity {
     private List<Contact> getContactNames() {
         List<Contact> contacts = new ArrayList<>();
         ContentResolver cr = getContentResolver();
-        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PROJECTION, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME+" ASC");
+        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PROJECTION, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME.toUpperCase()+" ASC");
         if (cursor != null) {
             try {
                 final int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
