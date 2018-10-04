@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -36,6 +37,10 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
 
         TextView name = listItem.findViewById(R.id.contactName);
         name.setText(currentContact.getName());
+        TextView number = listItem.findViewById(R.id.contactNumber);
+        number.setText(currentContact.getPhoneNumber());
+
+        CheckBox selected = listItem.findViewById(R.id.contactSelected);
 
         return listItem;
     }
