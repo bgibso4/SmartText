@@ -118,21 +118,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //creating a thread to run the table queries in the background
-        (new Thread(){
-            public void run(){
-                //Creating shared preferences
-                pref = PreferenceManager.getDefaultSharedPreferences(context);
-                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
-                showContacts();
-                Gson gson = new Gson();
-                Set<String> ContactSet = new HashSet<>();
-                for(Contact c : contacts) {
-                    ContactSet.add(gson.toJson(c));
-                }
-                editor.putStringSet("ContactsList", ContactSet);
-                editor.commit();
-            }
-        }).start();
+//        (new Thread(){
+//            public void run(){
+//                //Creating shared preferences
+//                pref = PreferenceManager.getDefaultSharedPreferences(context);
+//                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
+//                showContacts();
+//                Gson gson = new Gson();
+//                Set<String> ContactSet = new HashSet<>();
+//                for(Contact c : contacts) {
+//                    ContactSet.add(gson.toJson(c));
+//                }
+//                editor.putStringSet("ContactsList", ContactSet);
+//                editor.apply();
+//            }
+//        }).start();
 
 
 

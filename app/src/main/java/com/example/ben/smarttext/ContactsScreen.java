@@ -1,8 +1,9 @@
 package com.example.ben.smarttext;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ListView;
@@ -17,31 +18,29 @@ import java.util.List;
 import java.util.Set;
 
 public class ContactsScreen extends AppCompatActivity {
-    // The ListView
-    private ListView lstNames;
-    private SearchView searchContacts;
     private List<Contact> contacts, queriedContacts;
     private ContactAdapter adapter;
 
-    // Request code for READ_CONTACTS. It can be any number > 0.
-    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
-
-//    private static final String[] PROJECTION = new String[] {
-//            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-//            ContactsContract.Contacts.DISPLAY_NAME,
-//            ContactsContract.CommonDataKinds.Phone.NUMBER
-//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts_screen);
 
-        searchContacts = findViewById(R.id.searchContacts);
+        SearchView searchContacts = findViewById(R.id.searchContacts);
 
         // Find the list view
-        this.lstNames = findViewById(R.id.lstNames);
-        lstNames.setOnClickListener();
+        ListView lstNames = findViewById(R.id.lstNames);
+        lstNames.setOnItemClickListener((adapterView, view, pos, id) -> {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
+            Gson gson = new Gson();
+            String selectedContact = gson.toJson(contacts.get(pos));
+            editor.putString("SelectedContact", selectedContact);
+            editor.apply();
+            Intent intent = new Intent(ContactsScreen.this, CreateNewText.class);
+            startActivity(intent);
+        });
 
         SharedPreferences appSharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this.getApplicationContext());
