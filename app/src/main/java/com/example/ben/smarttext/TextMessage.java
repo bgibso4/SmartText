@@ -18,12 +18,12 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity(tableName = "TextMessages")
 public class TextMessage {
     @PrimaryKey
-    private int uid;
-
+    private UUID uid;
     private String phoneNumber;
     private String message;
     private String name;
@@ -34,11 +34,11 @@ public class TextMessage {
 
 
 
-    public int getUid(){
+    public UUID getUid(){
         return uid;
     }
 
-    public void setUid(int id){
+    public void setUid(UUID id){
         this.uid = id;
     }
 
@@ -144,7 +144,7 @@ public class TextMessage {
         }
         else{
             SmsManager sms = SmsManager.getDefault();
-            //sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
+            sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
         }
     }
     public void requestMessageServices(Context context){

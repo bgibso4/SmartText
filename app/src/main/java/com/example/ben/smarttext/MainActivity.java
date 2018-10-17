@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Context context;
     AppDatabase database;
-    SMSJobService service;
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
     MessageLayoutAdapter messageAdapter;
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         this.context = this;
 
 
-        database = Room.databaseBuilder(this, AppDatabase.class, "db-test")
+        database = Room.databaseBuilder(this, AppDatabase.class, "textMessages")
                 .allowMainThreadQueries() //TODO get rid of main thread queries
                 .build();
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
@@ -113,15 +112,18 @@ public class MainActivity extends AppCompatActivity {
                 handler.post(() -> {
                     try {
                         SendTexts();
+                        messageAdapter.notifyDataSetChanged();
                     }
                     catch (Exception e) {
                         // TODO Auto-generated catch block
                         throw new NullPointerException(e.getMessage());
                     }
                 });
+
             }
         };
-        timer.schedule(doAsynchronousTask, 5000, 10000);
+        timer.schedule(doAsynchronousTask, 0, 10000);
+
 
 
 
@@ -130,12 +132,23 @@ public class MainActivity extends AppCompatActivity {
 
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
         List<TextMessage> allMessages = textMessageDAO.getMessages();
-        for (TextMessage t: allMessages) {
+        List<TextMessage> tempMessages = textMessageDAO.getMessages();
+        int index = 0;
+        for (TextMessage t: tempMessages) {
             if(t.getDate().before(new Date()) || t.getDate().equals(new Date())){
                 //TODO call the send messages function
                 t.sendMessage(this);
-                //service.sendSMS(t.getPhoneNumber(), t.getMessage());
+                //pendingMessageView.removeViewAt(index);
+                textMessageDAO.delete(t);
+                allMessages.remove(index);
+
+
+                //messageAdapter.dataSet.remove(index);
+                messageAdapter.notifyDataSetChanged();
+                //messageAdapter.notifyItemRangeChanged(index, allMessages.size());
+
             }
+            index++;
         }
 
     }
