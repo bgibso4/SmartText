@@ -1,10 +1,18 @@
 package com.example.ben.smarttext;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.arch.persistence.room.Room;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.os.Build;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 
 import android.os.Handler;
@@ -16,9 +24,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,7 +44,18 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
     MessageLayoutAdapter messageAdapter;
+    SharedPreferences pref;
+    private List<Contact> contacts;
 
+
+    // Request code for READ_CONTACTS. It can be any number > 0.
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+
+    private static final String[] PROJECTION = new String[] {
+            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Phone.NUMBER
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +68,6 @@ public class MainActivity extends AppCompatActivity {
                 .allowMainThreadQueries() //TODO get rid of main thread queries
                 .build();
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
-//        TextMessage textMessage = new TextMessage();
-//        textMessage.setUid(5);
-//        textMessage.setName("Luke");
-//        textMessage.setMessage("Asuh Duh");
-//        textMessage.setPhoneNumber("5197028412");
-//        textMessage.setDate(new Date());
-//
-//        textMessageDAO.insert(textMessage);
         List<TextMessage> texts = textMessageDAO.getMessages();
 
 
@@ -100,7 +117,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        //creating a thread to run the table queries in the background
+//        (new Thread(){
+//            public void run(){
+//                //Creating shared preferences
+//                pref = PreferenceManager.getDefaultSharedPreferences(context);
+//                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
+//                showContacts();
+//                Gson gson = new Gson();
+//                Set<String> ContactSet = new HashSet<>();
+//                for(Contact c : contacts) {
+//                    ContactSet.add(gson.toJson(c));
+//                }
+//                editor.putStringSet("ContactsList", ContactSet);
+//                editor.apply();
+//            }
+//        }).start();
 
 
 
@@ -126,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
     public void SendTexts(){
 
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
@@ -139,4 +172,56 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    /**
+     * Show the contacts in the ListView.
+     */
+    private void showContacts() {
+        // Check the SDK version and whether the permission is already granted or not.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+        } else {
+            // Android version is lesser than 6.0 or the permission is already granted.
+            contacts = getContactNames();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted
+                showContacts();
+            } else {
+                Toast.makeText(this, "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Read the name of all the contacts.
+     *
+     * @return a list of names.
+     */
+    private List<Contact> getContactNames() {
+        List<Contact> contacts = new ArrayList<>();
+        ContentResolver cr = getContentResolver();
+        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PROJECTION, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME.toUpperCase()+" ASC");
+        if (cursor != null) {
+            try {
+                final int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                final int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+
+                while (cursor.moveToNext()) {
+                    contacts.add(new Contact(cursor.getString(nameIndex), cursor.getString(numberIndex)));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return contacts;
+    }
+
 }
