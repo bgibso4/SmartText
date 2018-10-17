@@ -52,4 +52,7 @@ public class MessageLayoutAdapter extends RecyclerView.Adapter<MessageLayoutAdap
     public int getItemCount() {
         return this.dataSet.size();
     }
+
+
+
 }
