@@ -17,6 +17,7 @@ import android.provider.ContactsContract;
 
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,7 +40,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private Context context;
-    AppDatabase database;
+//    AppDatabase database;
     SMSJobService service;
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
             ContactsContract.CommonDataKinds.Phone.NUMBER
     };
 
+    @SuppressLint("ShortAlarm")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,11 +66,11 @@ public class MainActivity extends AppCompatActivity {
         this.context = this;
 
 
-        database = Room.databaseBuilder(this, AppDatabase.class, "db-test")
-                .allowMainThreadQueries() //TODO get rid of main thread queries
-                .build();
-        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
-        List<TextMessage> texts = textMessageDAO.getMessages();
+//        database = Room.databaseBuilder(this, AppDatabase.class, "db-test")
+//                .allowMainThreadQueries() //TODO get rid of main thread queries
+//                .build();
+//        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+//        List<TextMessage> texts = textMessageDAO.getMessages();
 
 
 
@@ -85,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
         pendingMessageView.setLayoutManager(messageLayoutManager);
 
         // specify an adapter (see also next example)
-        messageAdapter = new MessageLayoutAdapter(texts);
-        pendingMessageView.setAdapter(messageAdapter);
+//        messageAdapter = new MessageLayoutAdapter(texts);
+//        pendingMessageView.setAdapter(messageAdapter);
 
 
 
@@ -97,42 +99,33 @@ public class MainActivity extends AppCompatActivity {
 
         Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
         boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
-        if(alarmRunning == false) {
+        if(!alarmRunning) {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this.context, 0, alarm, 0);
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            assert alarmManager != null;
             alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
         }
 
-        createTextBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, CreateNewText.class));
-            }
-        });
+        createTextBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateNewText.class)));
 
-        contactsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ContactsScreen.class));
-            }
-        });
+        contactsButton.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, ContactsScreen.class)));
 
-        //creating a thread to run the table queries in the background
-//        (new Thread(){
-//            public void run(){
-//                //Creating shared preferences
-//                pref = PreferenceManager.getDefaultSharedPreferences(context);
-//                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
-//                showContacts();
-//                Gson gson = new Gson();
-//                Set<String> ContactSet = new HashSet<>();
-//                for(Contact c : contacts) {
-//                    ContactSet.add(gson.toJson(c));
-//                }
-//                editor.putStringSet("ContactsList", ContactSet);
-//                editor.apply();
-//            }
-//        }).start();
+        // creating a thread to run the table queries in the background
+        (new Thread(){
+            public void run(){
+                //Creating shared preferences
+                pref = PreferenceManager.getDefaultSharedPreferences(context);
+                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
+                showContacts();
+                Gson gson = new Gson();
+                Set<String> ContactSet = new HashSet<>();
+                for(Contact c : contacts) {
+                    ContactSet.add(gson.toJson(c));
+                }
+                editor.putStringSet("ContactsList", ContactSet);
+                editor.apply();
+            }
+        }).start();
 
 
 
@@ -161,15 +154,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void SendTexts(){
 
-        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
-        List<TextMessage> allMessages = textMessageDAO.getMessages();
-        for (TextMessage t: allMessages) {
-            if(t.getDate().before(new Date()) || t.getDate().equals(new Date())){
-                //TODO call the send messages function
-                t.sendMessage(this);
-                //service.sendSMS(t.getPhoneNumber(), t.getMessage());
-            }
-        }
+//        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+//        List<TextMessage> allMessages = textMessageDAO.getMessages();
+//        for (TextMessage t: allMessages) {
+//            if(t.getDate().before(new Date()) || t.getDate().equals(new Date())){
+//                //TODO call the send messages function
+//                t.sendMessage(this);
+//                //service.sendSMS(t.getPhoneNumber(), t.getMessage());
+//            }
+//        }
 
     }
 
@@ -188,8 +181,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission is granted

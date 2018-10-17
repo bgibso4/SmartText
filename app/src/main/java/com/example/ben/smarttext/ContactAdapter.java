@@ -19,7 +19,7 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
     private Context context;
     private List<Contact> contactList;
 
-    public ContactAdapter(@NonNull Context context, int resource, @NonNull List<Contact> contactList) {
+    ContactAdapter(@NonNull Context context, int resource, @NonNull List<Contact> contactList) {
         super(context, resource, contactList);
         this.context = context;
         this.contactList = contactList;
@@ -40,12 +40,12 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
         TextView number = listItem.findViewById(R.id.contactNumber);
         number.setText(currentContact.getPhoneNumber());
 
-        CheckBox selected = listItem.findViewById(R.id.contactSelected);
+//        CheckBox selected = listItem.findViewById(R.id.contactSelected);
 
         return listItem;
     }
 
-    public void updateContacts(List<Contact> contactList){
+    void updateContacts(List<Contact> contactList){
         this.contactList.clear();
         this.contactList.addAll(contactList);
         this.notifyDataSetChanged();
