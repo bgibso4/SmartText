@@ -37,4 +37,5 @@ dependencies {
     implementation 'com.android.support:cardview-v7:27.1.1'
     implementation files('libs/gson-2.8.1-javadoc.jar')
     implementation files('libs/gson-2.8.5.jar')
+    implementation files('libs/gson-2.8.5.jar')
 }
