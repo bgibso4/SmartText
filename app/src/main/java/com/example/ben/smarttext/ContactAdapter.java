@@ -40,7 +40,7 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
         TextView number = listItem.findViewById(R.id.contactNumber);
         number.setText(currentContact.getPhoneNumber());
 
-//        CheckBox selected = listItem.findViewById(R.id.contactSelected);
+        //CheckBox selected = listItem.findViewById(R.id.contactSelected);
 
         return listItem;
     }
