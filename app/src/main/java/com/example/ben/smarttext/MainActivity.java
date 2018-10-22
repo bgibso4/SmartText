@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     MessageLayoutAdapter messageAdapter;
     SharedPreferences pref;
     private List<Contact> contacts;
+    private boolean contactsPermissonCheck;
 
 
     // Request code for READ_CONTACTS. It can be any number > 0.
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.context = this;
-
+        this.contactsPermissonCheck = false;
 
         database = Room.databaseBuilder(this, AppDatabase.class, "textMessages")
                 .allowMainThreadQueries() //TODO get rid of main thread queries
@@ -120,9 +122,13 @@ public class MainActivity extends AppCompatActivity {
         (new Thread(){
             public void run(){
                 //Creating shared preferences
+                Looper.prepare();
                 pref = PreferenceManager.getDefaultSharedPreferences(context);
                 @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
-                showContacts();
+                while(!contactsPermissonCheck){
+                    showContacts();
+                }
+
                 //TODO: The getContacts() is never called if the permission has not been granted yet
                 Gson gson = new Gson();
                 Set<String> ContactSet = new HashSet<>();
@@ -176,7 +182,8 @@ public class MainActivity extends AppCompatActivity {
                 textMessageDAO.delete(t);
                 allMessages.remove(index);
 
-
+                messageAdapter.dataSet.clear();
+                messageAdapter.dataSet.addAll(allMessages);
                 //messageAdapter.dataSet.remove(index);
                 messageAdapter.notifyDataSetChanged();
                 //messageAdapter.notifyItemRangeChanged(index, allMessages.size());
@@ -205,12 +212,19 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted
-                showContacts();
-            } else {
-                Toast.makeText(this, "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
+            if(grantResults.length!=0){
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted
+                    this.contactsPermissonCheck = true;
+                    showContacts();
+                }
+                else {
+                    Toast.makeText(this, "Until you grant the permission, we cannot display your contacts", Toast.LENGTH_SHORT).show();
+
+                }
+
             }
+
         }
     }
 
@@ -236,6 +250,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return contacts;
+    }
+
+
+    private List<TextMessage> sortMessages(List<TextMessage> messages){
+        //messages.sort();
+        return null;
     }
 
 }
