@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity(tableName = "TextMessages")
@@ -150,6 +151,16 @@ public class TextMessage {
     public void requestMessageServices(Context context){
         ActivityCompat.requestPermissions((Activity) context,
                 new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SMS);
+    }
+
+    public int compareMessages(TextMessage message){
+        if(this.getDate().before(message.getDate())){
+            return 1;
+        }
+        else if(this.getDate().after(message.getDate())){
+            return -1;
+        }
+        return 0;
     }
 
 
