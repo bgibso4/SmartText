@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
@@ -17,12 +18,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Entity(tableName = "TextMessages")
-public class TextMessage {
+public class TextMessage implements Comparable<TextMessage>{
     @PrimaryKey
     private UUID uid;
     private String phoneNumber;
@@ -70,8 +76,19 @@ public class TextMessage {
     public Date getDate(){
         return date;
     }
-    public long timeAway(){
-        return date.getTime() - new Date().getTime();
+    public String timeAway(){
+        String timeAwayText;
+        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+        long x = (date.getTime()- System.currentTimeMillis());
+        long y = TimeUnit.DAYS.toMillis(1);
+        if(x>y ){
+            timeAwayText = dateFormat.format(date);
+        }
+        else{
+            timeAwayText = timeFormat.format(date);
+        }
+        return timeAwayText;
     }
 
     public void setDate(Date d){
@@ -115,6 +132,7 @@ public class TextMessage {
                                 Toast.LENGTH_SHORT).show();
                         break;
                 }
+                context.unregisterReceiver(this);
             }
         }, new IntentFilter(SENT));
 
@@ -133,6 +151,7 @@ public class TextMessage {
                                 Toast.LENGTH_SHORT).show();
                         break;
                 }
+                context.unregisterReceiver(this);
             }
         }, new IntentFilter(DELIVERED));
         int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS);
@@ -153,16 +172,10 @@ public class TextMessage {
                 new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SMS);
     }
 
-    public int compareMessages(TextMessage message){
-        if(this.getDate().before(message.getDate())){
-            return 1;
-        }
-        else if(this.getDate().after(message.getDate())){
-            return -1;
-        }
-        return 0;
+
+    @Override
+    public int compareTo(@NonNull TextMessage otherMessage) {
+        return (this.getDate().compareTo(otherMessage.getDate()));
     }
-
-
-
 }
+

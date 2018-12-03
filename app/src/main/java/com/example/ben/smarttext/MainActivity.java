@@ -4,7 +4,10 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.arch.persistence.room.Room;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +33,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -70,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
         List<TextMessage> texts = textMessageDAO.getMessages();
-
+        texts.sort(TextMessage::compareTo);
 
 
         pendingMessageView = findViewById(R.id.pendingMessageList);
@@ -89,19 +93,25 @@ public class MainActivity extends AppCompatActivity {
         messageAdapter = new MessageLayoutAdapter(texts);
         pendingMessageView.setAdapter(messageAdapter);
 
-
+//        JobScheduler jobScheduler = this.getSystemService(JobScheduler.class);
+//        Intent jobServiceAlarm = new Intent(this, MessageSenderRestartReceiver.class);
+//        getApplicationContext().startService(jobServiceAlarm);
+//        ComponentName serviceComponent = new ComponentName(this, TextMessageJobService.class);
+//        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+//        builder.setMinimumLatency(60000);
+//        jobScheduler.schedule(builder.build());
 
 
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
-        Button contactsButton = findViewById((R.id.contactsButton));
+        //Button contactsButton = findViewById((R.id.contactsButton));
 
 
         Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
         boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
-        if(alarmRunning == false) {
+        if(!alarmRunning) {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this.context, 0, alarm, 0);
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
         }
 
         createTextBtn.setOnClickListener(new View.OnClickListener() {
@@ -111,12 +121,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        contactsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ContactsScreen.class));
-            }
-        });
+//        contactsButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startActivity(new Intent(MainActivity.this, ContactsScreen.class));
+//            }
+//        });
 
         //creating a thread to run the table queries in the background
         (new Thread(){
@@ -161,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        timer.schedule(doAsynchronousTask, 0, 10000);
+        timer.schedule(doAsynchronousTask, 1000, 10000);
 
 
 
@@ -183,11 +193,13 @@ public class MainActivity extends AppCompatActivity {
                 allMessages.remove(index);
 
                 messageAdapter.dataSet.clear();
+                messageAdapter.notifyDataSetChanged();
                 messageAdapter.dataSet.addAll(allMessages);
+                messageAdapter.dataSet.sort(TextMessage::compareTo);
                 //messageAdapter.dataSet.remove(index);
                 messageAdapter.notifyDataSetChanged();
                 //messageAdapter.notifyItemRangeChanged(index, allMessages.size());
-
+                index--;
             }
             index++;
         }

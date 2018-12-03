@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MessageLayoutAdapter extends RecyclerView.Adapter<MessageLayoutAdapter.MessageViewHolder> {
 
@@ -44,7 +45,9 @@ public class MessageLayoutAdapter extends RecyclerView.Adapter<MessageLayoutAdap
     @Override
     public void onBindViewHolder(@NonNull MessageLayoutAdapter.MessageViewHolder holder, int position) {
         holder.messageRecipient.setText(dataSet.get(position).getName());
-        holder.messageDate.setText(String.valueOf(dataSet.get(position).timeAway()));
+
+
+        holder.messageDate.setText(dataSet.get(position).timeAway());
         holder.messageBody.setText(dataSet.get(position).getMessage());
     }
 

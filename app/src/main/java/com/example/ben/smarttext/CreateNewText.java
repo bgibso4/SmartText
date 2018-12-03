@@ -79,7 +79,11 @@ public class CreateNewText extends AppCompatActivity {
 
         dateField.setText(dateToSet);
 
-        String currentTime = Integer.toString(hour)+" : "+Integer.toString(c.get(Calendar.MINUTE))+" "+ampm;
+        String minutes = Integer.toString(c.get(Calendar.MINUTE));
+        if(c.get(Calendar.MINUTE)<10){
+            minutes = "0" + minutes;
+        }
+        String currentTime = Integer.toString(hour)+" : "+minutes+" "+ampm;
         timeField.setText(currentTime);
         CreateNewText tempThis = this;
 
