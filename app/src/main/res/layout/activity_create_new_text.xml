@@ -4,23 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/background_light"
+    android:background="#363640"
     android:textAlignment="center"
     tools:context=".CreateNewText"
     tools:layout_editor_absoluteY="25dp">
 
     <!--<View-->
-        <!--android:id="@+id/divider3"-->
-        <!--android:layout_width="312dp"-->
-        <!--android:layout_height="1dp"-->
-        <!--android:layout_marginEnd="8dp"-->
-        <!--android:layout_marginStart="8dp"-->
-        <!--android:layout_marginTop="284dp"-->
-        <!--android:background="?android:attr/listDivider"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintHorizontal_bias="0.493"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent" />-->
+    <!--android:id="@+id/divider3"-->
+    <!--android:layout_width="312dp"-->
+    <!--android:layout_height="1dp"-->
+    <!--android:layout_marginEnd="8dp"-->
+    <!--android:layout_marginStart="8dp"-->
+    <!--android:layout_marginTop="284dp"-->
+    <!--android:background="?android:attr/listDivider"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintHorizontal_bias="0.493"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toTopOf="parent" />-->
 
     <EditText
         android:id="@+id/timeField"
@@ -94,17 +94,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!--<EditText-->
-        <!--android:id="@+id/editText3"-->
-        <!--android:layout_width="66dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginStart="52dp"-->
-        <!--android:layout_marginTop="248dp"-->
-        <!--android:background="@android:color/transparent"-->
-        <!--android:ems="10"-->
-        <!--android:inputType="textPersonName"-->
-        <!--android:text="Repeat"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent" />-->
+    <!--android:id="@+id/editText3"-->
+    <!--android:layout_width="66dp"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginStart="52dp"-->
+    <!--android:layout_marginTop="248dp"-->
+    <!--android:background="@android:color/transparent"-->
+    <!--android:ems="10"-->
+    <!--android:inputType="textPersonName"-->
+    <!--android:text="Repeat"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toTopOf="parent" />-->
 
     <ImageView
         android:id="@+id/imageView"
@@ -172,13 +172,29 @@
         app:srcCompat="@drawable/ic_contact" />
 
     <FrameLayout
+        android:layout_width="445dp"
+        android:layout_height="72dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="484dp"
+        android:background="#4c4c59"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="384dp"
         android:layout_height="68dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="4dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="308dp"
-        android:background="@android:color/background_light"
+        android:background="#4c4c59"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -207,7 +223,8 @@
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="340dp"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:background="#4c4c59">
 
                     <android.support.design.widget.TextInputEditText
                         android:id="@+id/newMessage"
@@ -226,7 +243,7 @@
         android:id="@+id/sendBtn"
         android:layout_width="42dp"
         android:layout_height="42dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_weight="1"
         android:background="@android:color/transparent"

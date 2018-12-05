@@ -28,6 +28,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -75,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
         List<TextMessage> texts = textMessageDAO.getMessages();
         texts.sort(TextMessage::compareTo);
+        TextView pendingMessageTitle = this.findViewById(R.id.pendingMessageTitle);
+        pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
 
 
         pendingMessageView = findViewById(R.id.pendingMessageList);
@@ -162,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         SendTexts();
                         messageAdapter.notifyDataSetChanged();
+                        pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
                     }
                     catch (Exception e) {
                         // TODO Auto-generated catch block
