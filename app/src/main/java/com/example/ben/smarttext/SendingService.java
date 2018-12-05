@@ -3,11 +3,12 @@ package com.example.ben.smarttext;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.arch.persistence.room.Room;
+//import android.arch.persistence.room.Room;
+import androidx.room.Room;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.support.annotation.Nullable;
+//import android.support.annotation.Nullable;
 import androidx.annotation.Nullable;
 
 import android.content.Context;

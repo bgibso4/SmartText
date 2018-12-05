@@ -4,7 +4,8 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.arch.persistence.room.Room;
+
+import androidx.room.Room;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.util.Log;

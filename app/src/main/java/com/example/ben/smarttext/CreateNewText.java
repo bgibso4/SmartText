@@ -63,29 +63,29 @@ public class CreateNewText extends AppCompatActivity {
         phoneRetv.setAdapter(baseRecipientAdapter);
 
         // setting up searchable contacts from the create new text screen
-        SharedPreferences appSharedPrefs = PreferenceManager
-                .getDefaultSharedPreferences(this.getApplicationContext());
-        Gson gson = new Gson();
-        Set<String> contactSet = appSharedPrefs.getStringSet("ContactsList", new HashSet<>());
-        contacts = new ArrayList<>();
-        for(String contact : contactSet){
-            Contact createContact  = gson.fromJson(contact, Contact.class);
-            contacts.add(createContact);
-        }
-        Collections.sort(contacts, new ContactsComparator());
-        adapter = new ContactAdapter(this, 0, new ArrayList<>(contacts));
-        AutoCompleteTextView searchContacts = findViewById(R.id.contactsSearch);
-        searchContacts.setThreshold(0);
-        searchContacts.setAdapter(adapter);
-        searchContacts.setText("");
-        searchContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Contact selected = (Contact) parent.getItemAtPosition(position);
-                searchContacts.setText(selected.getName());
-            }
-        });
+//        SharedPreferences appSharedPrefs = PreferenceManager
+//                .getDefaultSharedPreferences(this.getApplicationContext());
+//        Gson gson = new Gson();
+//        Set<String> contactSet = appSharedPrefs.getStringSet("ContactsList", new HashSet<>());
+//        contacts = new ArrayList<>();
+//        for(String contact : contactSet){
+//            Contact createContact  = gson.fromJson(contact, Contact.class);
+//            contacts.add(createContact);
+//        }
+//        Collections.sort(contacts, new ContactsComparator());
+//        adapter = new ContactAdapter(this, 0, new ArrayList<>(contacts));
+//        AutoCompleteTextView searchContacts = findViewById(R.id.contactsSearch);
+//        searchContacts.setThreshold(0);
+//        searchContacts.setAdapter(adapter);
+//        searchContacts.setText("");
+//        searchContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Contact selected = (Contact) parent.getItemAtPosition(position);
+//                searchContacts.setText(selected.getName());
+//            }
+//        });
         //final ComponentName componentName = new ComponentName(this, SMSJobService.class);
 
         //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);

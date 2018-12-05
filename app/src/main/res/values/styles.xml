@@ -19,4 +19,16 @@
 
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar"/>
 
+    <style name="TextInputStyle" parent="TextAppearance.AppCompat">
+        <!-- Hint color and label color in FALSE state -->
+        <item name="android:textColorHint">@color/materialBlueLight</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/materialBlueLight</item>
+        <!-- Label color in TRUE state and bar color FALSE and TRUE State -->
+        <item name="colorAccent">@color/materialBlueLight</item>
+        <item name="colorControlNormal">@color/materialBlueLight</item>
+        <item name="colorControlActivated">@color/materialBlueLight</item>
+
+    </style>
+
 </resources>

@@ -12,26 +12,43 @@
         android:id="@+id/divider3"
         android:layout_width="312dp"
         android:layout_height="1dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="284dp"
+        android:layout_marginEnd="8dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ScrollView
-        android:id="@+id/scrollView2"
-        android:layout_width="368dp"
-        android:layout_height="77dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
+    <FrameLayout
+        android:layout_width="500dp"
+        android:layout_height="55dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="284dp"
+        android:layout_marginEnd="8dp"
+        android:background="#43424d"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.483"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+    </FrameLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="340dp"
+        android:layout_height="51dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="#43424d"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0">
@@ -39,18 +56,22 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#43424d"
             android:orientation="vertical">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="340dp"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="#43424d"
+                >
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/newMessage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="New Message"
-                    android:textColor="@android:color/background_dark" />
+                    android:textColor="@android:color/background_dark"
+                    android:theme="@style/TextInputStyle"/>
 
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -60,8 +81,8 @@
         android:id="@+id/sendBtn"
         android:layout_width="42dp"
         android:layout_height="42dp"
-        android:layout_marginBottom="40dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
         android:background="@android:color/transparent"
         android:tint="@android:color/holo_green_light"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -72,9 +93,9 @@
         android:id="@+id/timeField"
         android:layout_width="127dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="108dp"
+        android:layout_marginEnd="8dp"
         android:background="@android:color/transparent"
         android:ems="10"
         android:focusableInTouchMode="false"
@@ -91,9 +112,9 @@
         android:id="@+id/divider"
         android:layout_width="307dp"
         android:layout_height="1dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="144dp"
+        android:layout_marginEnd="8dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -117,9 +138,9 @@
         android:id="@+id/divider2"
         android:layout_width="312dp"
         android:layout_height="1dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="212dp"
+        android:layout_marginEnd="8dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.493"
@@ -156,9 +177,9 @@
         android:id="@+id/imageView"
         android:layout_width="28dp"
         android:layout_height="26dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="108dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toStartOf="@+id/editText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -168,36 +189,36 @@
         android:id="@+id/imageView2"
         android:layout_width="28dp"
         android:layout_height="29dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="176dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toStartOf="@+id/editText2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_today" />
 
     <!--<com.google.android.material.chip.ChipGroup-->
-        <!--android:id="@+id/chipGroup"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="47dp"-->
-        <!--android:layout_marginStart="27dp"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:layout_marginEnd="24dp"-->
-        <!--android:hint="To"-->
-        <!--android:visibility="visible"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent"-->
-        <!--app:singleLine="false">-->
+    <!--android:id="@+id/chipGroup"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="47dp"-->
+    <!--android:layout_marginStart="27dp"-->
+    <!--android:layout_marginTop="8dp"-->
+    <!--android:layout_marginEnd="24dp"-->
+    <!--android:hint="To"-->
+    <!--android:visibility="visible"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toTopOf="parent"-->
+    <!--app:singleLine="false">-->
 
     <!--</com.google.android.material.chip.ChipGroup>-->
 
     <!--<chip-->
-        <!--style="@style/Widget.MaterialComponents.Chip.Entry"-->
-        <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-        <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
-        <!--android:checkable="false"-->
-        <!--app:iconStartPadding="5dp"/>-->
+    <!--style="@style/Widget.MaterialComponents.Chip.Entry"-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+    <!--android:checkable="false"-->
+    <!--app:iconStartPadding="5dp"/>-->
 
     <com.android.ex.chips.RecipientEditTextView
         android:id="@+id/phone_retv"
@@ -212,8 +233,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-
 
 
     <EditText
