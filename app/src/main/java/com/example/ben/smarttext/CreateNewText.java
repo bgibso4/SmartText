@@ -1,28 +1,36 @@
 package com.example.ben.smarttext;
 
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.arch.persistence.room.Room;
-import android.content.ComponentName;
+import android.annotation.SuppressLint;
+
+import androidx.room.Room;
+
 import android.content.Context;
 import android.content.Intent;
-import android.os.PersistableBundle;
-import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AppCompatActivity;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
+import com.android.ex.chips.BaseRecipientAdapter;
+import com.android.ex.chips.RecipientEditTextView;
+import com.google.android.material.textfield.TextInputEditText;
+
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TimePicker;
+import android.widget.MultiAutoCompleteTextView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class CreateNewText extends AppCompatActivity {
 
@@ -33,15 +41,51 @@ public class CreateNewText extends AppCompatActivity {
     private int minutes;
     private Context context;
     AppDatabase database;
+    private List<Contact> contacts;
+    private ContactAdapter adapter;
 
-
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_text);
         this.context = this;
 
+        // creates an autocomplete for phone number contacts
+        final RecipientEditTextView phoneRetv = findViewById(R.id.phone_retv);
+        phoneRetv.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+        BaseRecipientAdapter baseRecipientAdapter = new BaseRecipientAdapter(BaseRecipientAdapter.QUERY_TYPE_PHONE, this);
 
+        // Queries for all phone numbers. Includes phone numbers marked as "mobile" and "others".
+        // If set as true, baseRecipientAdapter will query only for phone numbers marked as "mobile".
+        baseRecipientAdapter.setShowMobileOnly(false);
+
+        phoneRetv.setAdapter(baseRecipientAdapter);
+
+        // setting up searchable contacts from the create new text screen
+        SharedPreferences appSharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext());
+        Gson gson = new Gson();
+        Set<String> contactSet = appSharedPrefs.getStringSet("ContactsList", new HashSet<>());
+        contacts = new ArrayList<>();
+        for(String contact : contactSet){
+            Contact createContact  = gson.fromJson(contact, Contact.class);
+            contacts.add(createContact);
+        }
+        Collections.sort(contacts, new ContactsComparator());
+        adapter = new ContactAdapter(this, 0, new ArrayList<>(contacts));
+        AutoCompleteTextView searchContacts = findViewById(R.id.contactsSearch);
+        searchContacts.setThreshold(0);
+        searchContacts.setAdapter(adapter);
+        searchContacts.setText("");
+        searchContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Contact selected = (Contact) parent.getItemAtPosition(position);
+                searchContacts.setText(selected.getName());
+            }
+        });
         //final ComponentName componentName = new ComponentName(this, SMSJobService.class);
 
         //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);

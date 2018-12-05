@@ -8,6 +8,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.arch.persistence.room.Room;
 import android.content.ComponentName;
+import androidx.room.Room;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,12 +22,13 @@ import android.provider.ContactsContract;
 
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +47,8 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private Context context;
+//    AppDatabase database;
+    SMSJobService service;
     AppDatabase database;
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
@@ -63,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
             ContactsContract.CommonDataKinds.Phone.NUMBER
     };
 
+    @SuppressLint("ShortAlarm")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,12 +122,7 @@ public class MainActivity extends AppCompatActivity {
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
         }
 
-        createTextBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, CreateNewText.class));
-            }
-        });
+        createTextBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateNewText.class)));
 
 //        contactsButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -225,8 +225,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
             if(grantResults.length!=0){
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {

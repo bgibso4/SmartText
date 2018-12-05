@@ -1,8 +1,8 @@
 package com.example.ben.smarttext;
 
-import android.arch.persistence.room.Database;
-import android.arch.persistence.room.RoomDatabase;
-import android.arch.persistence.room.TypeConverters;
+import androidx.room.Database;
+import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
 @Database(entities = {TextMessage.class}, version = 2)
 @TypeConverters({DateTypeConverer.class, UUIDTypeConverter.class})
