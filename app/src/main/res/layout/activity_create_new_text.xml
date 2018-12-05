@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -41,18 +41,18 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="340dp"
                 android:layout_height="match_parent">
 
-                <android.support.design.widget.TextInputEditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/newMessage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="New Message"
                     android:textColor="@android:color/background_dark" />
 
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </ScrollView>
 
@@ -176,12 +176,52 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_today" />
 
+    <!--<com.google.android.material.chip.ChipGroup-->
+        <!--android:id="@+id/chipGroup"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="47dp"-->
+        <!--android:layout_marginStart="27dp"-->
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:layout_marginEnd="24dp"-->
+        <!--android:hint="To"-->
+        <!--android:visibility="visible"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent"-->
+        <!--app:singleLine="false">-->
+
+    <!--</com.google.android.material.chip.ChipGroup>-->
+
+    <!--<chip-->
+        <!--style="@style/Widget.MaterialComponents.Chip.Entry"-->
+        <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+        <!--android:checkable="false"-->
+        <!--app:iconStartPadding="5dp"/>-->
+
+    <com.android.ex.chips.RecipientEditTextView
+        android:id="@+id/phone_retv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:hint="enter phone numbers"
+        android:minHeight="58dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
+
     <EditText
         android:id="@+id/dateField"
         android:layout_width="97dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginTop="176dp"
+        android:layout_marginEnd="16dp"
         android:background="@android:color/transparent"
         android:ems="10"
         android:focusableInTouchMode="false"
@@ -191,30 +231,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/contactName"
-        android:layout_width="308dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Name"
-        app:layout_constraintEnd_toStartOf="@+id/searchContacts"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/searchContacts"
-        android:layout_width="49dp"
-        android:layout_height="46dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        android:elevation="1dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_contact" />
-
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,7 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.arch.persistence.room.Room;
+import androidx.room.Room;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,13 +18,13 @@ import android.provider.ContactsContract;
 
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -90,8 +90,8 @@ public class MainActivity extends AppCompatActivity {
         pendingMessageView.setLayoutManager(messageLayoutManager);
 
         // specify an adapter (see also next example)
-//        messageAdapter = new MessageLayoutAdapter(texts);
-//        pendingMessageView.setAdapter(messageAdapter);
+        messageAdapter = new MessageLayoutAdapter(texts);
+        pendingMessageView.setAdapter(messageAdapter);
 
 
 

@@ -3,22 +3,20 @@ package com.example.ben.smarttext;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Entity(tableName = "TextMessages")
