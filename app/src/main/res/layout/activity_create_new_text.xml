@@ -160,18 +160,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!--<EditText-->
-    <!--android:id="@+id/editText3"-->
-    <!--android:layout_width="66dp"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_marginStart="52dp"-->
-    <!--android:layout_marginTop="248dp"-->
-    <!--android:background="@android:color/transparent"-->
-    <!--android:ems="10"-->
-    <!--android:inputType="textPersonName"-->
-    <!--android:text="Repeat"-->
-    <!--app:layout_constraintStart_toStartOf="parent"-->
-    <!--app:layout_constraintTop_toTopOf="parent" />-->
 
     <ImageView
         android:id="@+id/imageView"
@@ -197,28 +185,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_today" />
 
-    <!--<com.google.android.material.chip.ChipGroup-->
-    <!--android:id="@+id/chipGroup"-->
-    <!--android:layout_width="0dp"-->
-    <!--android:layout_height="47dp"-->
-    <!--android:layout_marginStart="27dp"-->
-    <!--android:layout_marginTop="8dp"-->
-    <!--android:layout_marginEnd="24dp"-->
-    <!--android:hint="To"-->
-    <!--android:visibility="visible"-->
-    <!--app:layout_constraintEnd_toEndOf="parent"-->
-    <!--app:layout_constraintStart_toStartOf="parent"-->
-    <!--app:layout_constraintTop_toTopOf="parent"-->
-    <!--app:singleLine="false">-->
-
-    <!--</com.google.android.material.chip.ChipGroup>-->
-
-    <!--<chip-->
-    <!--style="@style/Widget.MaterialComponents.Chip.Entry"-->
-    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
-    <!--android:checkable="false"-->
-    <!--app:iconStartPadding="5dp"/>-->
 
     <com.android.ex.chips.RecipientEditTextView
         android:id="@+id/phone_retv"

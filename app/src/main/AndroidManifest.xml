@@ -23,17 +23,9 @@
         <activity android:name=".CreateNewText" />
 
         <service
-            android:name=".SMSJobService"
-            android:enabled="true"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true" />
-        <service
             android:name=".SendingService"
             android:enabled="true"
             android:stopWithTask="false" />
-
-        <service android:name=".TextMessageJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <receiver android:name="MessageSenderRestartReceiver"
             android:enabled="true"
@@ -42,11 +34,6 @@
 
         </receiver>
 
-
-        <activity
-            android:name=".ContactsScreen"
-            android:label="@string/title_activity_contacts_screen"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
 
     </application>
 

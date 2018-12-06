@@ -4,10 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-//import android.app.job.JobInfo;
-//import android.app.job.JobScheduler;
-//import android.arch.persistence.room.Room;
-//import android.content.ComponentName;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import android.content.ContentResolver;
@@ -20,7 +16,6 @@ import android.os.Build;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-
 import android.os.Handler;
 import android.os.SystemClock;
 import androidx.annotation.NonNull;
@@ -28,16 +23,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
-//import android.support.v4.widget.RecyclerView;
-
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
-
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -48,8 +37,6 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private Context context;
-//    AppDatabase database;
-    SMSJobService service;
     AppDatabase database;
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
@@ -61,12 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
     // Request code for READ_CONTACTS. It can be any number > 0.
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
-
-    private static final String[] PROJECTION = new String[] {
-            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-            ContactsContract.Contacts.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Phone.NUMBER
-    };
 
     @SuppressLint("ShortAlarm")
     @Override
@@ -102,17 +83,8 @@ public class MainActivity extends AppCompatActivity {
         messageAdapter = new MessageLayoutAdapter(texts);
         pendingMessageView.setAdapter(messageAdapter);
 
-//        JobScheduler jobScheduler = this.getSystemService(JobScheduler.class);
-//        Intent jobServiceAlarm = new Intent(this, MessageSenderRestartReceiver.class);
-//        getApplicationContext().startService(jobServiceAlarm);
-//        ComponentName serviceComponent = new ComponentName(this, TextMessageJobService.class);
-//        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
-//        builder.setMinimumLatency(60000);
-//        jobScheduler.schedule(builder.build());
-
 
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
-        //Button contactsButton = findViewById((R.id.contactsButton));
 
 
         Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
@@ -125,32 +97,16 @@ public class MainActivity extends AppCompatActivity {
 
         createTextBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateNewText.class)));
 
-//        contactsButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(MainActivity.this, ContactsScreen.class));
-//            }
-//        });
 
         //creating a thread to run the table queries in the background
         (new Thread(){
             public void run(){
                 //Creating shared preferences
                 Looper.prepare();
-                pref = PreferenceManager.getDefaultSharedPreferences(context);
-                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
                 while(!contactsPermissonCheck){
                     showContacts();
                 }
 
-                //TODO: The getContacts() is never called if the permission has not been granted yet
-                Gson gson = new Gson();
-                Set<String> ContactSet = new HashSet<>();
-                for(Contact c : contacts) {
-                    ContactSet.add(gson.toJson(c));
-                }
-                editor.putStringSet("ContactsList", ContactSet);
-                editor.apply();
             }
         }).start();
 
@@ -216,12 +172,9 @@ public class MainActivity extends AppCompatActivity {
      */
     private void showContacts() {
         // Check the SDK version and whether the permission is already granted or not.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-        } else {
-            // Android version is lesser than 6.0 or the permission is already granted.
-            contacts = getContactNames();
         }
     }
 
@@ -245,34 +198,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Read the name of all the contacts.
-     *
-     * @return a list of names.
-     */
-    private List<Contact> getContactNames() {
-        List<Contact> contacts = new ArrayList<>();
-        ContentResolver cr = getContentResolver();
-        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PROJECTION, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME.toUpperCase()+" ASC");
-        if (cursor != null) {
-            try {
-                final int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-                final int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-
-                while (cursor.moveToNext()) {
-                    contacts.add(new Contact(cursor.getString(nameIndex), cursor.getString(numberIndex)));
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        return contacts;
-    }
-
-
-    private List<TextMessage> sortMessages(List<TextMessage> messages){
-        //messages.sort();
-        return null;
-    }
 
 }
