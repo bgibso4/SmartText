@@ -39,7 +39,7 @@ public class SendingService extends Service {
             //TODO : call the sendSMS function
             String s = "";
             Log.i(s, "Another one");
-            AppDatabase database = Room.databaseBuilder(context, AppDatabase.class, "textMessages")
+            AppDatabase database = Room.databaseBuilder(context, AppDatabase.class, "messages")
                     .allowMainThreadQueries() //TODO get rid of main thread queries
                     .build();
             TextMessageDAO textMessageDAO = database.getTextMessageDAO();

@@ -2,10 +2,14 @@ package com.example.ben.smarttext;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.net.Uri;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -20,11 +24,14 @@ public class MessageLayoutAdapter extends RecyclerView.Adapter<MessageLayoutAdap
         TextView messageRecipient;
         TextView messageDate;
         TextView messageBody;
+        ImageView recipientImage;
         MessageViewHolder(View v) {
             super(v);
             messageRecipient = v.findViewById(R.id.recipientName);
             messageDate = v.findViewById(R.id.messageDate);
             messageBody = v.findViewById(R.id.messageBody);
+            messageBody.setEllipsize(TextUtils.TruncateAt.END);
+            recipientImage = v.findViewById(R.id.recipientImage);
         }
     }
 
@@ -45,10 +52,9 @@ public class MessageLayoutAdapter extends RecyclerView.Adapter<MessageLayoutAdap
     @Override
     public void onBindViewHolder(@NonNull MessageLayoutAdapter.MessageViewHolder holder, int position) {
         holder.messageRecipient.setText(dataSet.get(position).getName());
-
-
         holder.messageDate.setText(dataSet.get(position).timeAway());
         holder.messageBody.setText(dataSet.get(position).getMessage());
+        holder.recipientImage.setImageBitmap(BitmapTypeConverter.StringToBitMap(dataSet.get(position).getRecipientImage()));
     }
 
     @Override

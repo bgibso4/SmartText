@@ -7,16 +7,16 @@
 
     <TextView
         android:id="@+id/recipientName"
-        android:layout_width="119dp"
+        android:layout_width="257dp"
         android:layout_height="31dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginStart="16dp"
         android:text="TextView"
         android:textColor="@android:color/background_light"
-        android:textSize="24sp"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/recipientImage"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -31,21 +31,33 @@
 
     <TextView
         android:id="@+id/messageBody"
-        android:layout_width="260dp"
+        android:layout_width="317dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="28dp"
         android:text="TextView"
         android:textColor="@android:color/background_light"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/recipientImage"
+        app:layout_constraintTop_toTopOf="parent"
+        android:singleLine="true" />
 
     <Space
         android:layout_width="3dp"
         android:layout_height="6dp"
         android:layout_marginStart="72dp"
-        android:layout_marginTop="68dp"
+        android:layout_marginTop="60dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/recipientImage"
+        android:layout_width="48dp"
+        android:layout_height="45dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/ic_contact_picture" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
