@@ -4,6 +4,8 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import android.content.ContentResolver;
@@ -12,6 +14,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -66,9 +69,28 @@ public class MainActivity extends AppCompatActivity {
         TextView pendingMessageTitle = this.findViewById(R.id.pendingMessageTitle);
         pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
 
+        //Handling swipe actions for the recycler view
+        SwipeController swipeController = new SwipeController(new SwipeControllerActions() {
+            @Override
+            public void onRightClicked(int position) {
+                List<TextMessage> allMessages = database.getTextMessageDAO().getMessages();
+                database.getTextMessageDAO().delete(allMessages.get(position));
+                messageAdapter.dataSet.remove(position);
+                messageAdapter.notifyItemRemoved(position);
+                messageAdapter.notifyItemRangeChanged(position, messageAdapter.getItemCount());
+            }
+        }, this.getApplicationContext());
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
 
         pendingMessageView = findViewById(R.id.pendingMessageList);
+        itemTouchHelper.attachToRecyclerView(pendingMessageView);
 
+        pendingMessageView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                swipeController.onDraw(c);
+            }
+        });
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         //pendingMessageView.setHasFixedSize(true);
@@ -99,16 +121,14 @@ public class MainActivity extends AppCompatActivity {
 
 
         //creating a thread to run the table queries in the background
-        (new Thread(){
-            public void run(){
-                //Creating shared preferences
-                Looper.prepare();
-                while(!contactsPermissonCheck){
-                    showContacts();
-                }
-
+        (new Thread(() -> {
+            //Creating shared preferences
+            Looper.prepare();
+            while(!contactsPermissonCheck){
+                showContacts();
             }
-        }).start();
+
+        })).start();
 
 
 
@@ -120,6 +140,10 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 handler.post(() -> {
                     try {
+                        if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                            requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, 0);
+                            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+                        }
                         SendTexts();
                         messageAdapter.notifyDataSetChanged();
                         pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");

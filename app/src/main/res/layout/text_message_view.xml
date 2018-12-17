@@ -9,8 +9,8 @@
         android:id="@+id/recipientName"
         android:layout_width="119dp"
         android:layout_height="31dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:text="TextView"
         android:textColor="@android:color/background_light"
         android:textSize="24sp"
@@ -19,14 +19,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/messageDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:text="TextView"
-        android:textColor="#f5f3f1"
-        app:layout_constraintEnd_toEndOf="parent"
+    <Space
+        android:layout_width="3dp"
+        android:layout_height="6dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="68dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -40,12 +38,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Space
-        android:layout_width="3dp"
-        android:layout_height="6dp"
-        android:layout_marginStart="72dp"
-        android:layout_marginTop="68dp"
-        app:layout_constraintStart_toStartOf="parent"
+    <TextView
+        android:id="@+id/messageDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="TextView"
+        android:textColor="#f5f3f1"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

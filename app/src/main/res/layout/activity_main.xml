@@ -15,8 +15,8 @@
         android:id="@+id/createTextBtn"
         android:layout_width="60dp"
         android:layout_height="58dp"
-        android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
         app:backgroundTint="@android:color/holo_green_light"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -30,13 +30,13 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.529"
+        app:layout_constraintHorizontal_bias="0.555"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.174" />
+        app:layout_constraintTop_toBottomOf="@+id/divider3"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/pendingMessageTitle"
@@ -57,8 +57,8 @@
         android:id="@+id/divider3"
         android:layout_width="395dp"
         android:layout_height="1dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="72dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="80dp"
         android:background="#4d4c4c"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
