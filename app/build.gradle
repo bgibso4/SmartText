@@ -42,4 +42,5 @@ dependencies {
     implementation files('libs/gson-2.8.1-javadoc.jar')
     implementation files('libs/gson-2.8.5.jar')
     implementation files('libs/gson-2.8.5.jar')
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
 }

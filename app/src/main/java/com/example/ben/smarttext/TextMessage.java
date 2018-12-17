@@ -13,6 +13,9 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -30,6 +33,7 @@ public class TextMessage implements Comparable<TextMessage>{
     private String message;
     private String name;
     private Date date;
+    private String recipientImage;
 
     private static final int PERMISSION_REQUEST_SMS=0;
 
@@ -67,6 +71,10 @@ public class TextMessage implements Comparable<TextMessage>{
     public void setName(String n){
         this.name = n;
     }
+
+    public String getRecipientImage() {return this.recipientImage;}
+
+    public void setRecipientImage(String image){this.recipientImage = image;}
 
     public Date getDate(){
         return date;

@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         this.context = this;
         this.contactsPermissonCheck = false;
 
-        database = Room.databaseBuilder(this, AppDatabase.class, "textMessages")
+        database = Room.databaseBuilder(this, AppDatabase.class, "messages")
                 .allowMainThreadQueries() //TODO get rid of main thread queries
                 .build();
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
