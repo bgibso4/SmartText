@@ -26,6 +26,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
@@ -39,14 +41,13 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Context context;
     AppDatabase database;
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
     MessageLayoutAdapter messageAdapter;
     SharedPreferences pref;
-    private List<Contact> contacts;
-    private boolean contactsPermissonCheck;
+    SwipeController swipeController;
+    boolean contactsPermissonCheck;
 
 
     // Request code for READ_CONTACTS. It can be any number > 0.
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.context = this;
+        Context context = this;
         this.contactsPermissonCheck = false;
 
         database = Room.databaseBuilder(this, AppDatabase.class, "messages")
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
 
         //Handling swipe actions for the recycler view
-        SwipeController swipeController = new SwipeController(new SwipeControllerActions() {
+        this.swipeController = new SwipeController(new SwipeControllerActions() {
             @Override
             public void onRightClicked(int position) {
                 List<TextMessage> allMessages = database.getTextMessageDAO().getMessages();
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 messageAdapter.notifyItemRemoved(position);
                 messageAdapter.notifyItemRangeChanged(position, messageAdapter.getItemCount());
             }
+
         }, this.getApplicationContext());
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
 
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         });
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-        //pendingMessageView.setHasFixedSize(true);
+        // pendingMessageView.setHasFixedSize(true);
 
 
         // use a linear layout manager
@@ -105,20 +107,18 @@ public class MainActivity extends AppCompatActivity {
         messageAdapter = new MessageLayoutAdapter(texts);
         pendingMessageView.setAdapter(messageAdapter);
 
-
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
 
+        Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
+        boolean alarmRunning = (PendingIntent.getBroadcast(context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
 
-        Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
-        boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
         if(!alarmRunning) {
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this.context, 0, alarm, 0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarm, 0);
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
         }
 
         createTextBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateNewText.class)));
-
 
         //creating a thread to run the table queries in the background
         (new Thread(() -> {
@@ -127,10 +127,7 @@ public class MainActivity extends AppCompatActivity {
             while(!contactsPermissonCheck){
                 showContacts();
             }
-
         })).start();
-
-
 
         final Handler handler = new Handler();
         Timer timer = new Timer();
@@ -146,7 +143,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                         SendTexts();
                         messageAdapter.notifyDataSetChanged();
-                        pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
+                        String pendingMessage = "Pending Messages ("+texts.size()+")";
+                        pendingMessageTitle.setText(pendingMessage);
                     }
                     catch (Exception e) {
                         // TODO Auto-generated catch block
@@ -157,14 +155,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         timer.schedule(doAsynchronousTask, 1000, 10000);
-
-
-
-
     }
 
     public void SendTexts(){
-
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
         List<TextMessage> allMessages = textMessageDAO.getMessages();
         List<TextMessage> tempMessages = textMessageDAO.getMessages();
