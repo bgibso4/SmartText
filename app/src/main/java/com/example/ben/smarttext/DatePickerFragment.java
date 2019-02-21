@@ -3,6 +3,7 @@ package com.example.ben.smarttext;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.DatePicker;
@@ -21,13 +22,12 @@ public class DatePickerFragment extends DialogFragment
     private int day;
 
 
-    public String GetDateString(){
-        return dateString;
-    }
+
 
     public void setView(View v){
         this.view = v;
     }
+
 
 
     public void setYear(int y){
@@ -58,6 +58,13 @@ public class DatePickerFragment extends DialogFragment
         return this.createNewText;
     }
 
+    public String GetDateString(){
+        return dateString;
+    }
+    public void SetDateString(int year, int month, int day){
+        this.dateString = (month+1)+"/"+day+"/"+year;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the current date as the default date in the picker
@@ -81,5 +88,10 @@ public class DatePickerFragment extends DialogFragment
         createNewText.setDay(getDay());
         createNewText.setMonth(getMonth());
         createNewText.setYear(getYear());
+    }
+
+    public void onCancel(DialogInterface dialogInterface){
+        EditText time = view.findViewById(R.id.dateField);
+        time.setText(dateString);
     }
 }

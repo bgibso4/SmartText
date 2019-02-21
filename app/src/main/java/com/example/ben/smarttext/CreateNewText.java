@@ -1,28 +1,36 @@
 package com.example.ben.smarttext;
 
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.arch.persistence.room.Room;
-import android.content.ComponentName;
+import android.annotation.SuppressLint;
+
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.room.Room;
+
 import android.content.Context;
 import android.content.Intent;
-import android.os.PersistableBundle;
-import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AppCompatActivity;
+import com.android.ex.chips.BaseRecipientAdapter;
+import com.android.ex.chips.ContactImageCreator;
+import com.android.ex.chips.RecipientEditTextView;
+import com.android.ex.chips.RecipientEntry;
+import com.android.ex.chips.recipientchip.DrawableRecipientChip;
+import com.google.android.material.textfield.TextInputEditText;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TimePicker;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.time.LocalDate;
+import android.widget.MultiAutoCompleteTextView;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class CreateNewText extends AppCompatActivity {
 
@@ -31,26 +39,91 @@ public class CreateNewText extends AppCompatActivity {
     private int day;
     private int hours;
     private int minutes;
-    private Context context;
+    private String currentTime;
     AppDatabase database;
+    private boolean recipientCheck;
+    private boolean messageBodyCheck;
 
-
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_text);
-        this.context = this;
+        Context context = this;
+        recipientCheck = false;
+        messageBodyCheck = false;
 
+        // creates an autocomplete for phone number contacts
+        final RecipientEditTextView phoneRetv = findViewById(R.id.phone_retv);
+        phoneRetv.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+        BaseRecipientAdapter baseRecipientAdapter = new BaseRecipientAdapter(BaseRecipientAdapter.QUERY_TYPE_PHONE, this);
 
-        //final ComponentName componentName = new ComponentName(this, SMSJobService.class);
+        // Queries for all phone numbers. Includes phone numbers marked as "mobile" and "others".
+        // If set as true, baseRecipientAdapter will query only for phone numbers marked as "mobile".
+        baseRecipientAdapter.setShowMobileOnly(false);
 
-        //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        phoneRetv.setAdapter(baseRecipientAdapter);
+        phoneRetv.addTextChangedListener(new TextWatcher() {
+
+             @Override
+             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+             }
+
+             @Override
+             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(phoneRetv.getRecipients().length !=0){
+                    recipientCheck = true;
+                    if(messageBodyCheck){
+                        AllowSending();
+                    }
+                }
+                else{
+                    recipientCheck=false;
+                    DisallowSending();
+                }
+             }
+
+             @Override
+             public void afterTextChanged(Editable s) {
+
+             }
+         });
+
+        EditText newMessage = this.findViewById(R.id.newMessage);
+        newMessage.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(count==0 && start==0){
+                    messageBodyCheck= false;
+                    DisallowSending();
+                }
+                else{
+                    messageBodyCheck = true;
+                    if(recipientCheck){
+                        AllowSending();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         ImageButton sendBtn = findViewById(R.id.sendBtn);
 
-        database = Room.databaseBuilder(this, AppDatabase.class, "textMessages")
+        database = Room.databaseBuilder(this, AppDatabase.class, "messages")
                 .allowMainThreadQueries() //TODO get rid of main thread queries
                 .build();
-        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+
 
 
         EditText timeField = findViewById(R.id.timeField);
@@ -79,117 +152,36 @@ public class CreateNewText extends AppCompatActivity {
 
         dateField.setText(dateToSet);
 
-        String currentTime = Integer.toString(hour)+" : "+Integer.toString(c.get(Calendar.MINUTE))+" "+ampm;
+        String minutes = Integer.toString(c.get(Calendar.MINUTE));
+        if(c.get(Calendar.MINUTE)<10){
+            minutes = "0" + minutes;
+        }
+        this.currentTime = Integer.toString(hour)+" : "+minutes+" "+ampm;
         timeField.setText(currentTime);
         CreateNewText tempThis = this;
 
+        CardView timeCard = this.findViewById(R.id.timeCard);
+        CardView dateCard = this.findViewById(R.id.dateCard);
 
-        timeField.setOnClickListener(new View.OnClickListener(){
+        
 
-            @Override
-            public void onClick(View view) {
-                TimePickerFragment newFragment = new TimePickerFragment();
-                newFragment.setView(view);
-                newFragment.setCreateNewText(tempThis);
-                newFragment.setTimeString(currentTime);
-                newFragment.setHour(c.get(Calendar.HOUR_OF_DAY));
-                newFragment.setMinute(c.get(Calendar.MINUTE));
+        timeCard.setOnClickListener(view -> {
+            TimePickerFragment newFragment = new TimePickerFragment();
+            newFragment.setView(view);
+            newFragment.setCreateNewText(tempThis);
+            newFragment.setTimeString(currentTime);
+            newFragment.setHour(c.get(Calendar.HOUR_OF_DAY));
+            newFragment.setMinute(c.get(Calendar.MINUTE));
 
-                newFragment.show(getSupportFragmentManager(), "timePicker");
+            newFragment.show(getSupportFragmentManager(), "timePicker");
 
 
-                timeField.setText(newFragment.getTimeString());
+            timeField.setText(newFragment.getTimeString());
 
-            }
         });
 
-        dateField.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View view) {
-                DatePickerFragment newFragment = new DatePickerFragment();
-                newFragment.setView(view);
-
-                newFragment.setCreateNewText(tempThis);
-                newFragment.setDay(c.get(Calendar.DAY_OF_MONTH));
-                newFragment.setMonth(c.get(Calendar.MONTH));
-                newFragment.setYear(c.get(Calendar.YEAR));
 
 
-                newFragment.show(getFragmentManager(), "datePicker");
-                dateField.setText(newFragment.GetDateString());
-
-
-
-
-            }
-        });
-
-        sendBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                String num= "5197028412";
-
-                Calendar cal = Calendar.getInstance();
-                cal.set(getYear(), getMonth(), getDay(), getHour(), getMinute(), 0);
-                Date dateRepresentation = cal.getTime();
-
-                TextInputEditText m = findViewById(R.id.newMessage);
-                String message= m.getText().toString();
-
-                TextMessage newText = new TextMessage();
-                newText.setDate(dateRepresentation);
-                newText.setMessage(message);
-                newText.setPhoneNumber(num);
-                newText.setName("Willie");
-                newText.setUid(java.util.UUID.randomUUID());
-                textMessageDAO.insert(newText);
-                startActivity(new Intent(CreateNewText.this, MainActivity.class));
-                //newText.sendMessage(context);
-                //String time= texts.getString("Time", "InvalidTime");
-//                boolean x = false;
-//                if(x){
-//
-//                }
-//                //TODO impliment the time feature and then enable this check
-////                else if(time.equals("InvalidTime")){
-////                    Snackbar.make(view, "Invalid Time set", Snackbar.LENGTH_LONG)
-////                        .setAction("Action", null).show();
-////                }
-//                else{
-//                    //schedule job
-//                    JSONObject textInfo= new JSONObject();
-//                    String[] textInf= {num, message};
-//                    try{
-//                        textInfo.put("phoneNum", num);
-//                        textInfo.put("message", message);
-//
-//                    }
-//                    catch(JSONException e){
-//                        e.printStackTrace();
-//                    }
-//
-//                    //check these
-//                    PersistableBundle bundle = new PersistableBundle();
-//                    bundle.putStringArray("TextInfo", textInf);
-//                    //bundle.putString("TextInfo", textInfo.toString());
-//                    final JobInfo jobInfo = new JobInfo.Builder(12, componentName)
-//                            .setMinimumLatency(5000)
-//                            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
-//                            .setExtras(bundle)
-//                            .build();
-//                    JobScheduler jobScheduler = (JobScheduler)getSystemService(JOB_SCHEDULER_SERVICE);
-//                    int resultCode = jobScheduler.schedule(jobInfo);
-//                    if (resultCode == JobScheduler.RESULT_SUCCESS) {
-//                        Log.d("Message", "Job scheduled!");
-//                    } else {
-//                        Log.d("Message", "Job not scheduled");
-//                    }
-//
-//                }
-            }
-        });
     }
 
     public void setYear(int y){
@@ -227,5 +219,120 @@ public class CreateNewText extends AppCompatActivity {
 
     public int getMinute(){
         return this.minutes;
+    }
+
+
+    private Bitmap AvatarImageCreator(RecipientEntry contact){
+        long contactId = contact.getContactId();
+
+        byte[] photoBytes = contact.getPhotoBytes();
+        // There may not be a photo yet if anything but the first contact address
+        // was selected.
+//        if (photoBytes == null && contact.getPhotoThumbnailUri() != null) {
+//            // TODO: cache this in the recipient entry?
+//            getAdapter().fetchPhoto(contact, contact.getPhotoThumbnailUri(), this.getContentResolver());
+//            photoBytes = contact.getPhotoBytes();
+//        }
+        if (photoBytes != null) {
+            return BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
+        } else {
+            // TODO: can the scaled down default photo be cached?
+            return ContactImageCreator.getLetterPicture(this, contact);
+        }
+    }
+    public Bitmap getRoundedShape(Bitmap scaleBitmapImage) {
+        int targetWidth = 50;
+        int targetHeight = 50;
+        Bitmap targetBitmap = Bitmap.createBitmap(targetWidth,
+                targetHeight,Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(targetBitmap);
+        Path path = new Path();
+        path.addCircle(((float) targetWidth - 1) / 2,
+                ((float) targetHeight - 1) / 2,
+                (Math.min(((float) targetWidth),
+                        ((float) targetHeight)) / 2),
+                Path.Direction.CCW);
+
+        canvas.clipPath(path);
+        Bitmap sourceBitmap = scaleBitmapImage;
+        canvas.drawBitmap(sourceBitmap,
+                new Rect(0, 0, sourceBitmap.getWidth(),
+                        sourceBitmap.getHeight()),
+                new Rect(0, 0, targetWidth, targetHeight), null);
+        return targetBitmap;
+    }
+
+    public void HandleDateClick(View arg0){
+        Calendar c =  Calendar.getInstance();
+
+        DatePickerFragment newFragment = new DatePickerFragment();
+        newFragment.setView(arg0);
+
+        newFragment.setCreateNewText(this);
+        newFragment.SetDateString(c.get(Calendar.YEAR) , c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+        newFragment.setDay(c.get(Calendar.DAY_OF_MONTH));
+        newFragment.setMonth(c.get(Calendar.MONTH));
+        newFragment.setYear(c.get(Calendar.YEAR));
+
+        EditText dateField = findViewById(R.id.dateField);
+        newFragment.show(getFragmentManager(), "datePicker");
+        dateField.setText(newFragment.GetDateString());
+    }
+
+    public void HandleTimeClick(View arg0){
+        Calendar c =  Calendar.getInstance();
+        TimePickerFragment newFragment = new TimePickerFragment();
+        newFragment.setView(arg0);
+
+        newFragment.setCreateNewText(this);
+        newFragment.setTimeString(currentTime);
+        newFragment.setHour(c.get(Calendar.HOUR_OF_DAY));
+        newFragment.setMinute(c.get(Calendar.MINUTE));
+
+        newFragment.show(getSupportFragmentManager(), "timePicker");
+        EditText timeField = findViewById(R.id.timeField);
+        timeField.setText(newFragment.getTimeString());
+    }
+
+    public void AllowSending(){
+        ImageButton sendBtn = findViewById(R.id.sendBtn);
+        final RecipientEditTextView phoneRetv = findViewById(R.id.phone_retv);
+        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+        sendBtn.setColorFilter(ContextCompat.getColor(this, R.color.materialLightGreenAccent));
+        sendBtn.setOnClickListener(view -> {
+
+            DrawableRecipientChip[] chips = phoneRetv.getSortedRecipients();
+
+
+            Calendar cal = Calendar.getInstance();
+            cal.set(getYear(), getMonth(), getDay(), getHour(), getMinute(), 0);
+            Date dateRepresentation = cal.getTime();
+
+            TextInputEditText m = findViewById(R.id.newMessage);
+            String message= m.getText().toString();
+
+
+            for (DrawableRecipientChip chip : chips) {
+                TextMessage newText = new TextMessage();
+                newText.setDate(dateRepresentation);
+                newText.setMessage(message);
+                String tempImage = BitmapTypeConverter.BitMapToString(this.AvatarImageCreator(chip.getEntry()));
+                newText.setRecipientImage(tempImage);
+                newText.setPhoneNumber(chip.getValue().toString());
+                newText.setName(chip.getDisplay().toString());
+                newText.setUid(java.util.UUID.randomUUID());
+                textMessageDAO.insert(newText);
+            }
+
+
+            startActivity(new Intent(CreateNewText.this, MainActivity.class));
+        });
+    }
+
+    public void DisallowSending(){
+        ImageButton sendBtn = findViewById(R.id.sendBtn);
+        sendBtn.setColorFilter(ContextCompat.getColor(this, R.color.materialGrey));
+        sendBtn.setOnContextClickListener(null);
     }
 }

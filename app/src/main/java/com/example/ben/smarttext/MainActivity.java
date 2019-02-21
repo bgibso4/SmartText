@@ -4,30 +4,33 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.arch.persistence.room.Room;
+
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Canvas;
 import android.os.Build;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -38,44 +41,61 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Context context;
     AppDatabase database;
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
     MessageLayoutAdapter messageAdapter;
     SharedPreferences pref;
-    private List<Contact> contacts;
+    SwipeController swipeController;
+    boolean contactsPermissonCheck;
 
 
     // Request code for READ_CONTACTS. It can be any number > 0.
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
-    private static final String[] PROJECTION = new String[] {
-            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-            ContactsContract.Contacts.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Phone.NUMBER
-    };
-
+    @SuppressLint("ShortAlarm")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.context = this;
+        Context context = this;
+        this.contactsPermissonCheck = false;
 
-
-        database = Room.databaseBuilder(this, AppDatabase.class, "textMessages")
+        database = Room.databaseBuilder(this, AppDatabase.class, "messages")
                 .allowMainThreadQueries() //TODO get rid of main thread queries
                 .build();
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
         List<TextMessage> texts = textMessageDAO.getMessages();
+        texts.sort(TextMessage::compareTo);
+        TextView pendingMessageTitle = this.findViewById(R.id.pendingMessageTitle);
+        pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
 
+        //Handling swipe actions for the recycler view
+        this.swipeController = new SwipeController(new SwipeControllerActions() {
+            @Override
+            public void onRightClicked(int position) {
+                List<TextMessage> allMessages = database.getTextMessageDAO().getMessages();
+                database.getTextMessageDAO().delete(allMessages.get(position));
+                messageAdapter.dataSet.remove(position);
+                messageAdapter.notifyItemRemoved(position);
+                messageAdapter.notifyItemRangeChanged(position, messageAdapter.getItemCount());
+            }
 
+        }, this.getApplicationContext());
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
 
         pendingMessageView = findViewById(R.id.pendingMessageList);
+        itemTouchHelper.attachToRecyclerView(pendingMessageView);
 
+        pendingMessageView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                swipeController.onDraw(c);
+            }
+        });
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-        //pendingMessageView.setHasFixedSize(true);
+        // pendingMessageView.setHasFixedSize(true);
 
 
         // use a linear layout manager
@@ -87,54 +107,27 @@ public class MainActivity extends AppCompatActivity {
         messageAdapter = new MessageLayoutAdapter(texts);
         pendingMessageView.setAdapter(messageAdapter);
 
-
-
-
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
-        Button contactsButton = findViewById((R.id.contactsButton));
 
+        Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
+        boolean alarmRunning = (PendingIntent.getBroadcast(context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
 
-        Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
-        boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
-        if(alarmRunning == false) {
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this.context, 0, alarm, 0);
+        if(!alarmRunning) {
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarm, 0);
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
         }
 
-        createTextBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, CreateNewText.class));
-            }
-        });
-
-        contactsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ContactsScreen.class));
-            }
-        });
+        createTextBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateNewText.class)));
 
         //creating a thread to run the table queries in the background
-        (new Thread(){
-            public void run(){
-                //Creating shared preferences
-                pref = PreferenceManager.getDefaultSharedPreferences(context);
-                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = pref.edit();
+        (new Thread(() -> {
+            //Creating shared preferences
+            Looper.prepare();
+            while(!contactsPermissonCheck){
                 showContacts();
-                //TODO: The getContacts() is never called if the permission has not been granted yet
-                Gson gson = new Gson();
-                Set<String> ContactSet = new HashSet<>();
-                for(Contact c : contacts) {
-                    ContactSet.add(gson.toJson(c));
-                }
-                editor.putStringSet("ContactsList", ContactSet);
-                editor.apply();
             }
-        }).start();
-
-
+        })).start();
 
         final Handler handler = new Handler();
         Timer timer = new Timer();
@@ -144,8 +137,14 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 handler.post(() -> {
                     try {
+                        if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                            requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, 0);
+                            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+                        }
                         SendTexts();
                         messageAdapter.notifyDataSetChanged();
+                        String pendingMessage = "Pending Messages ("+texts.size()+")";
+                        pendingMessageTitle.setText(pendingMessage);
                     }
                     catch (Exception e) {
                         // TODO Auto-generated catch block
@@ -155,15 +154,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        timer.schedule(doAsynchronousTask, 0, 10000);
-
-
-
-
+        timer.schedule(doAsynchronousTask, 1000, 10000);
     }
 
     public void SendTexts(){
-
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
         List<TextMessage> allMessages = textMessageDAO.getMessages();
         List<TextMessage> tempMessages = textMessageDAO.getMessages();
@@ -176,11 +170,14 @@ public class MainActivity extends AppCompatActivity {
                 textMessageDAO.delete(t);
                 allMessages.remove(index);
 
-
+                messageAdapter.dataSet.clear();
+                messageAdapter.notifyDataSetChanged();
+                messageAdapter.dataSet.addAll(allMessages);
+                messageAdapter.dataSet.sort(TextMessage::compareTo);
                 //messageAdapter.dataSet.remove(index);
                 messageAdapter.notifyDataSetChanged();
                 //messageAdapter.notifyItemRangeChanged(index, allMessages.size());
-
+                index--;
             }
             index++;
         }
@@ -192,50 +189,31 @@ public class MainActivity extends AppCompatActivity {
      */
     private void showContacts() {
         // Check the SDK version and whether the permission is already granted or not.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-        } else {
-            // Android version is lesser than 6.0 or the permission is already granted.
-            contacts = getContactNames();
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted
-                showContacts();
-            } else {
-                Toast.makeText(this, "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    /**
-     * Read the name of all the contacts.
-     *
-     * @return a list of names.
-     */
-    private List<Contact> getContactNames() {
-        List<Contact> contacts = new ArrayList<>();
-        ContentResolver cr = getContentResolver();
-        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PROJECTION, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME.toUpperCase()+" ASC");
-        if (cursor != null) {
-            try {
-                final int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-                final int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-
-                while (cursor.moveToNext()) {
-                    contacts.add(new Contact(cursor.getString(nameIndex), cursor.getString(numberIndex)));
+            if(grantResults.length!=0){
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted
+                    this.contactsPermissonCheck = true;
+                    showContacts();
                 }
-            } finally {
-                cursor.close();
+                else {
+                    Toast.makeText(this, "Until you grant the permission, we cannot display your contacts", Toast.LENGTH_SHORT).show();
+
+                }
+
             }
+
         }
-        return contacts;
     }
+
 
 }

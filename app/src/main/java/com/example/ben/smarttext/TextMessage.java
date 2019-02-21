@@ -3,31 +3,37 @@ package com.example.ben.smarttext;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Entity(tableName = "TextMessages")
-public class TextMessage {
+public class TextMessage implements Comparable<TextMessage>{
     @PrimaryKey
     private UUID uid;
     private String phoneNumber;
     private String message;
     private String name;
     private Date date;
+    private String recipientImage;
 
     private static final int PERMISSION_REQUEST_SMS=0;
 
@@ -66,11 +72,26 @@ public class TextMessage {
         this.name = n;
     }
 
+    public String getRecipientImage() {return this.recipientImage;}
+
+    public void setRecipientImage(String image){this.recipientImage = image;}
+
     public Date getDate(){
         return date;
     }
-    public long timeAway(){
-        return date.getTime() - new Date().getTime();
+    public String timeAway(){
+        String timeAwayText;
+        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+        long x = (date.getTime()- System.currentTimeMillis());
+        long y = TimeUnit.DAYS.toMillis(1);
+        if(x>y ){
+            timeAwayText = dateFormat.format(date);
+        }
+        else{
+            timeAwayText = timeFormat.format(date);
+        }
+        return timeAwayText;
     }
 
     public void setDate(Date d){
@@ -78,8 +99,6 @@ public class TextMessage {
     }
 
     public void sendMessage(Context context){
-         BroadcastReceiver sendBroadcastReceiver;
-         BroadcastReceiver deliveryBroadcastReceiver;
 
         String  SENT = "SMS_SENT";
         String  DELIVERED = "SMS_DELIVERED";
@@ -114,6 +133,7 @@ public class TextMessage {
                                 Toast.LENGTH_SHORT).show();
                         break;
                 }
+                context.unregisterReceiver(this);
             }
         }, new IntentFilter(SENT));
 
@@ -132,6 +152,7 @@ public class TextMessage {
                                 Toast.LENGTH_SHORT).show();
                         break;
                 }
+                context.unregisterReceiver(this);
             }
         }, new IntentFilter(DELIVERED));
         int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS);
@@ -153,5 +174,9 @@ public class TextMessage {
     }
 
 
-
+    @Override
+    public int compareTo(@NonNull TextMessage otherMessage) {
+        return (this.getDate().compareTo(otherMessage.getDate()));
+    }
 }
+
