@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
-
+        SendTexts();
 
 //        Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
 //        boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
@@ -155,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
                 //pendingMessageView.removeViewAt(index);
                 textMessageDAO.delete(t);
                 allMessages.remove(index);
-
                 messageAdapter.dataSet.clear();
                 messageAdapter.notifyDataSetChanged();
                 messageAdapter.dataSet.addAll(allMessages);
@@ -167,6 +167,15 @@ public class MainActivity extends AppCompatActivity {
             }
             index++;
         }
+
+        TextMessage nextMessage = textMessageDAO.getNextText();
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(nextMessage.getDate());
+        Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarm, 0);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 
     }
 
