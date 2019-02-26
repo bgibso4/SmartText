@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import androidx.cardview.widget.CardView;
 import androidx.room.Room;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import com.android.ex.chips.BaseRecipientAdapter;
@@ -21,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -132,6 +135,16 @@ public class CreateNewText extends AppCompatActivity {
             TextInputEditText m = findViewById(R.id.newMessage);
             String message= m.getText().toString();
 
+            TextMessage nextMessageBefore = textMessageDAO.getNextText();
+            boolean createAlarm = true;
+            if(nextMessageBefore!=null){
+                Calendar databaseCal = Calendar.getInstance();
+                databaseCal.setTime(nextMessageBefore.getDate());
+                if(cal.compareTo(databaseCal) > 0){
+                    createAlarm = false;
+                }
+            }
+
 
             for (DrawableRecipientChip chip : chips) {
                 TextMessage newText = new TextMessage();
@@ -143,6 +156,13 @@ public class CreateNewText extends AppCompatActivity {
                 newText.setName(chip.getDisplay().toString());
                 newText.setUid(java.util.UUID.randomUUID());
                 textMessageDAO.insert(newText);
+            }
+
+            if(createAlarm){
+                Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarm, 0);
+                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
             }
 
 

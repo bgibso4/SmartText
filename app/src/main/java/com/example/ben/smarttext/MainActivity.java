@@ -87,13 +87,13 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
 
 
-        Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
-        boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
-        if(!alarmRunning) {
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this.context, 0, alarm, 0);
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
-        }
+//        Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
+//        boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
+//        if(!alarmRunning) {
+//            PendingIntent pendingIntent = PendingIntent.getBroadcast(this.context, 0, alarm, 0);
+//            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+//            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
+//        }
 
         createTextBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateNewText.class)));
 
@@ -120,7 +120,10 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 handler.post(() -> {
                     try {
-                        SendTexts();
+                        //SendTexts();
+                        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+                        List<TextMessage> texts = textMessageDAO.getMessages();
+                        texts.sort(TextMessage::compareTo);
                         messageAdapter.notifyDataSetChanged();
                         pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
                     }
