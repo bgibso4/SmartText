@@ -180,8 +180,12 @@ public class CreateNewText extends AppCompatActivity {
 
         });
 
+    }
 
-
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(CreateNewText.this, MainActivity.class));
+        finish();
     }
 
     public void setYear(int y){
@@ -327,6 +331,7 @@ public class CreateNewText extends AppCompatActivity {
 
 
             startActivity(new Intent(CreateNewText.this, MainActivity.class));
+            finish();
         });
     }
 

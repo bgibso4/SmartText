@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
@@ -41,6 +42,7 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
+    Context context;
     AppDatabase database;
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
@@ -48,17 +50,21 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences pref;
     SwipeController swipeController;
     boolean contactsPermissonCheck;
-
+    String[] PERMISSIONS = {
+        Manifest.permission.SEND_SMS,
+        Manifest.permission.READ_CONTACTS,
+        Manifest.permission.READ_PHONE_STATE
+    };
 
     // Request code for READ_CONTACTS. It can be any number > 0.
-    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    private static final int PERMISSION_ALL = 1;
 
     @SuppressLint("ShortAlarm")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Context context = this;
+        this.context = this;
         this.contactsPermissonCheck = false;
 
         database = Room.databaseBuilder(this, AppDatabase.class, "messages")
@@ -118,14 +124,17 @@ public class MainActivity extends AppCompatActivity {
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
         }
 
-        createTextBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateNewText.class)));
+        createTextBtn.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, CreateNewText.class));
+            finish();
+        });
 
         //creating a thread to run the table queries in the background
         (new Thread(() -> {
             //Creating shared preferences
             Looper.prepare();
-            while(!contactsPermissonCheck){
-                showContacts();
+            while(!hasPermissions(context, PERMISSIONS)){
+                requestPermissions(PERMISSIONS, PERMISSION_ALL);
             }
         })).start();
 
@@ -137,10 +146,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 handler.post(() -> {
                     try {
-                        if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                            requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, 0);
-                            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-                        }
                         SendTexts();
                         messageAdapter.notifyDataSetChanged();
                         String pendingMessage = "Pending Messages ("+texts.size()+")";
@@ -155,6 +160,11 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         timer.schedule(doAsynchronousTask, 1000, 10000);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 
     public void SendTexts(){
@@ -184,36 +194,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Show the contacts in the ListView.
-     */
-    private void showContacts() {
-        // Check the SDK version and whether the permission is already granted or not.
-        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if(grantResults.length!=0){
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission is granted
-                    this.contactsPermissonCheck = true;
-                    showContacts();
+    public static boolean hasPermissions(Context context, String[] permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
                 }
-                else {
-                    Toast.makeText(this, "Until you grant the permission, we cannot display your contacts", Toast.LENGTH_SHORT).show();
-
-                }
-
             }
-
         }
+        return true;
     }
-
 
 }
