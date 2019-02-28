@@ -11,4 +11,6 @@ public class MessageSenderRestartReceiver extends BroadcastReceiver{
         Log.i(MessageSenderRestartReceiver.class.getSimpleName(), "Service has stopped!");
         context.startForegroundService(new Intent(context, SendingService.class));
     }
+
+
 }

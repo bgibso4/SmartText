@@ -2,13 +2,17 @@ package com.example.ben.smarttext;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
+
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -23,6 +27,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import android.telephony.SmsManager;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
@@ -45,7 +51,12 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences pref;
     private List<Contact> contacts;
     private boolean contactsPermissonCheck;
-
+    PendingIntent sentPI;
+    PendingIntent deliveredPI;
+    BroadcastReceiver sendBroadcastReceiver;
+    BroadcastReceiver deliveredBroadcastReceiver;
+    String  SENT = "SMS_SENT";
+    String  DELIVERED = "SMS_DELIVERED";
 
     // Request code for READ_CONTACTS. It can be any number > 0.
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
@@ -86,6 +97,64 @@ public class MainActivity extends AppCompatActivity {
 
 
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
+
+
+
+
+        //---when the SMS has been sent---
+
+        sendBroadcastReceiver = new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context arg0, Intent arg1) {
+                switch (getResultCode())
+                {
+                    case Activity.RESULT_OK:
+                        Toast.makeText(context, "SMS sent",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                        Toast.makeText(context, "Generic failure",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_NO_SERVICE:
+                        Toast.makeText(context, "No service",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_NULL_PDU:
+                        Toast.makeText(context, "Null PDU",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_RADIO_OFF:
+                        Toast.makeText(context, "Radio off",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        };
+        registerReceiver(sendBroadcastReceiver, new IntentFilter(SENT));
+
+        //---when the SMS has been delivered---
+
+        deliveredBroadcastReceiver = new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context arg0, Intent arg1) {
+                switch (getResultCode())
+                {
+                    case Activity.RESULT_OK:
+                        Toast.makeText(context, "SMS delivered",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Toast.makeText(context, "SMS not delivered",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        };
+
+        registerReceiver(deliveredBroadcastReceiver, new IntentFilter(DELIVERED));
+
+        //TODO: Instead of sending all of the texts that didnt send before maybe just delete them?
         SendTexts();
 
 //        Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
@@ -138,9 +207,6 @@ public class MainActivity extends AppCompatActivity {
         };
         timer.schedule(doAsynchronousTask, 1000, 10000);
 
-
-
-
     }
 
     public void SendTexts(){
@@ -169,13 +235,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         TextMessage nextMessage = textMessageDAO.getNextText();
+        if(nextMessage!=null){
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(nextMessage.getDate());
+            Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarm, 0);
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+        }
 
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(nextMessage.getDate());
-        Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarm, 0);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 
     }
 
@@ -208,6 +276,19 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+    }
+
+    @Override
+    protected void onPause() {
+        try{
+            unregisterReceiver(sendBroadcastReceiver);
+            unregisterReceiver(deliveredBroadcastReceiver);
+        }catch(IllegalArgumentException e){
+            System.out.print("No receiver is registered");
+        };
+
+        super.onPause();
+
     }
 
 
