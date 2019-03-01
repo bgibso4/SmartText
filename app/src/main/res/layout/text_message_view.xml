@@ -10,6 +10,7 @@
         android:layout_width="257dp"
         android:layout_height="31dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="8dp"
         android:text="TextView"
         android:textColor="@android:color/background_light"
@@ -23,6 +24,7 @@
         android:id="@+id/messageDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="16dp"
         android:text="TextView"
         android:textColor="#f5f3f1"
@@ -34,13 +36,13 @@
         android:layout_width="317dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="40dp"
+        android:singleLine="true"
         android:text="TextView"
         android:textColor="@android:color/background_light"
         android:textSize="12sp"
         app:layout_constraintStart_toEndOf="@+id/recipientImage"
-        app:layout_constraintTop_toTopOf="parent"
-        android:singleLine="true" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Space
         android:layout_width="3dp"
@@ -51,13 +53,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/recipientImage"
         android:layout_width="48dp"
         android:layout_height="45dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        android:src="@drawable/ic_contact_picture"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/ic_contact_picture" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

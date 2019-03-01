@@ -104,24 +104,10 @@ public class TextMessage implements Comparable<TextMessage>{
         PendingIntent sentPI = PendingIntent.getBroadcast(context, 0, new Intent(SENT), 0);
 
         PendingIntent deliveredPI = PendingIntent.getBroadcast(context, 0, new Intent(DELIVERED), 0);
-        int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS);
 
-        if(permissionCheck!= PackageManager.PERMISSION_GRANTED){
-            Log.e("Message", "Message was not sent");
-            //onRequestPermissionsResult(,Manifest.permission.SEND_SMS);
-            requestMessageServices(context);
-
-        }
-        else{
-            SmsManager sms = SmsManager.getDefault();
-            sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
-        }
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
     }
-    public void requestMessageServices(Context context){
-        ActivityCompat.requestPermissions((Activity) context,
-                new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SMS);
-    }
-
 
     @Override
     public int compareTo(@NonNull TextMessage otherMessage) {

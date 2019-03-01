@@ -5,6 +5,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
@@ -16,6 +19,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -29,6 +33,7 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.telephony.SmsManager;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
@@ -43,7 +48,7 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Context context;
+    Context context;
     AppDatabase database;
     RecyclerView pendingMessageView;
     LinearLayoutManager messageLayoutManager;
@@ -57,9 +62,16 @@ public class MainActivity extends AppCompatActivity {
     BroadcastReceiver deliveredBroadcastReceiver;
     String  SENT = "SMS_SENT";
     String  DELIVERED = "SMS_DELIVERED";
+    SwipeController swipeController;
+    boolean contactsPermissonCheck;
+    String[] PERMISSIONS = {
+        Manifest.permission.SEND_SMS,
+        Manifest.permission.READ_CONTACTS,
+        Manifest.permission.READ_PHONE_STATE
+    };
 
     // Request code for READ_CONTACTS. It can be any number > 0.
-    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    private static final int PERMISSION_ALL = 1;
 
     @SuppressLint("ShortAlarm")
     @Override
@@ -78,12 +90,32 @@ public class MainActivity extends AppCompatActivity {
         TextView pendingMessageTitle = this.findViewById(R.id.pendingMessageTitle);
         pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
 
+        //Handling swipe actions for the recycler view
+        this.swipeController = new SwipeController(new SwipeControllerActions() {
+            @Override
+            public void onRightClicked(int position) {
+                List<TextMessage> allMessages = database.getTextMessageDAO().getMessages();
+                database.getTextMessageDAO().delete(allMessages.get(position));
+                messageAdapter.dataSet.remove(position);
+                messageAdapter.notifyItemRemoved(position);
+                messageAdapter.notifyItemRangeChanged(position, messageAdapter.getItemCount());
+            }
+
+        }, this.getApplicationContext());
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
 
         pendingMessageView = findViewById(R.id.pendingMessageList);
+        itemTouchHelper.attachToRecyclerView(pendingMessageView);
 
+        pendingMessageView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                swipeController.onDraw(c);
+            }
+        });
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-        //pendingMessageView.setHasFixedSize(true);
+        // pendingMessageView.setHasFixedSize(true);
 
 
         // use a linear layout manager
@@ -95,9 +127,10 @@ public class MainActivity extends AppCompatActivity {
         messageAdapter = new MessageLayoutAdapter(texts);
         pendingMessageView.setAdapter(messageAdapter);
 
-
         FloatingActionButton createTextBtn= findViewById(R.id.createTextBtn);
 
+        Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
+        boolean alarmRunning = (PendingIntent.getBroadcast(context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
 
 
 
@@ -165,22 +198,19 @@ public class MainActivity extends AppCompatActivity {
 //            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
 //        }
 
-        createTextBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateNewText.class)));
-
+        createTextBtn.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, CreateNewText.class));
+            finish();
+        });
 
         //creating a thread to run the table queries in the background
-        (new Thread(){
-            public void run(){
-                //Creating shared preferences
-                Looper.prepare();
-                while(!contactsPermissonCheck){
-                    showContacts();
-                }
-
+        (new Thread(() -> {
+            //Creating shared preferences
+            Looper.prepare();
+            while(!hasPermissions(context, PERMISSIONS)){
+                requestPermissions(PERMISSIONS, PERMISSION_ALL);
             }
-        }).start();
-
-
+        })).start();
 
         final Handler handler = new Handler();
         Timer timer = new Timer();
@@ -195,7 +225,8 @@ public class MainActivity extends AppCompatActivity {
                         List<TextMessage> texts = textMessageDAO.getMessages();
                         texts.sort(TextMessage::compareTo);
                         messageAdapter.notifyDataSetChanged();
-                        pendingMessageTitle.setText("Pending Messages ("+texts.size()+")");
+                        String pendingMessage = "Pending Messages ("+texts.size()+")";
+                        pendingMessageTitle.setText(pendingMessage);
                     }
                     catch (Exception e) {
                         // TODO Auto-generated catch block
@@ -206,11 +237,14 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         timer.schedule(doAsynchronousTask, 1000, 10000);
+    }
 
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 
     public void SendTexts(){
-
         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
         List<TextMessage> allMessages = textMessageDAO.getMessages();
         List<TextMessage> tempMessages = textMessageDAO.getMessages();
@@ -247,35 +281,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Show the contacts in the ListView.
-     */
-    private void showContacts() {
-        // Check the SDK version and whether the permission is already granted or not.
-        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if(grantResults.length!=0){
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission is granted
-                    this.contactsPermissonCheck = true;
-                    showContacts();
+    public static boolean hasPermissions(Context context, String[] permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
                 }
-                else {
-                    Toast.makeText(this, "Until you grant the permission, we cannot display your contacts", Toast.LENGTH_SHORT).show();
-
-                }
-
             }
-
         }
+        return true;
     }
 
     @Override

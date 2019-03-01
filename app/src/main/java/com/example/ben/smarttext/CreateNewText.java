@@ -3,6 +3,7 @@ package com.example.ben.smarttext;
 import android.annotation.SuppressLint;
 
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.room.Room;
 
 import android.app.AlarmManager;
@@ -24,6 +25,8 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -41,6 +44,8 @@ public class CreateNewText extends AppCompatActivity {
     private int minutes;
     private String currentTime;
     AppDatabase database;
+    private boolean recipientCheck;
+    private boolean messageBodyCheck;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -48,6 +53,8 @@ public class CreateNewText extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_text);
         Context context = this;
+        recipientCheck = false;
+        messageBodyCheck = false;
 
         // creates an autocomplete for phone number contacts
         final RecipientEditTextView phoneRetv = findViewById(R.id.phone_retv);
@@ -59,13 +66,67 @@ public class CreateNewText extends AppCompatActivity {
         baseRecipientAdapter.setShowMobileOnly(false);
 
         phoneRetv.setAdapter(baseRecipientAdapter);
+        phoneRetv.addTextChangedListener(new TextWatcher() {
+
+             @Override
+             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+             }
+
+             @Override
+             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(phoneRetv.getRecipients().length !=0){
+                    recipientCheck = true;
+                    if(messageBodyCheck){
+                        AllowSending();
+                    }
+                }
+                else{
+                    recipientCheck=false;
+                    DisallowSending();
+                }
+             }
+
+             @Override
+             public void afterTextChanged(Editable s) {
+
+             }
+         });
+
+        EditText newMessage = this.findViewById(R.id.newMessage);
+        newMessage.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(count==0 && start==0){
+                    messageBodyCheck= false;
+                    DisallowSending();
+                }
+                else{
+                    messageBodyCheck = true;
+                    if(recipientCheck){
+                        AllowSending();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         ImageButton sendBtn = findViewById(R.id.sendBtn);
 
         database = Room.databaseBuilder(this, AppDatabase.class, "messages")
                 .allowMainThreadQueries() //TODO get rid of main thread queries
                 .build();
-        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+
 
 
         EditText timeField = findViewById(R.id.timeField);
@@ -122,6 +183,7 @@ public class CreateNewText extends AppCompatActivity {
 
         });
 
+    }
 
         sendBtn.setOnClickListener(view -> {
 
@@ -168,6 +230,10 @@ public class CreateNewText extends AppCompatActivity {
             database.close();
             startActivity(new Intent(CreateNewText.this, MainActivity.class));
         });
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(CreateNewText.this, MainActivity.class));
+        finish();
     }
 
     public void setYear(int y){
@@ -279,5 +345,47 @@ public class CreateNewText extends AppCompatActivity {
         newFragment.show(getSupportFragmentManager(), "timePicker");
         EditText timeField = findViewById(R.id.timeField);
         timeField.setText(newFragment.getTimeString());
+    }
+
+    public void AllowSending(){
+        ImageButton sendBtn = findViewById(R.id.sendBtn);
+        final RecipientEditTextView phoneRetv = findViewById(R.id.phone_retv);
+        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+        sendBtn.setColorFilter(ContextCompat.getColor(this, R.color.materialLightGreenAccent));
+        sendBtn.setOnClickListener(view -> {
+
+            DrawableRecipientChip[] chips = phoneRetv.getSortedRecipients();
+
+
+            Calendar cal = Calendar.getInstance();
+            cal.set(getYear(), getMonth(), getDay(), getHour(), getMinute(), 0);
+            Date dateRepresentation = cal.getTime();
+
+            TextInputEditText m = findViewById(R.id.newMessage);
+            String message= m.getText().toString();
+
+
+            for (DrawableRecipientChip chip : chips) {
+                TextMessage newText = new TextMessage();
+                newText.setDate(dateRepresentation);
+                newText.setMessage(message);
+                String tempImage = BitmapTypeConverter.BitMapToString(this.AvatarImageCreator(chip.getEntry()));
+                newText.setRecipientImage(tempImage);
+                newText.setPhoneNumber(chip.getValue().toString());
+                newText.setName(chip.getDisplay().toString());
+                newText.setUid(java.util.UUID.randomUUID());
+                textMessageDAO.insert(newText);
+            }
+
+
+            startActivity(new Intent(CreateNewText.this, MainActivity.class));
+            finish();
+        });
+    }
+
+    public void DisallowSending(){
+        ImageButton sendBtn = findViewById(R.id.sendBtn);
+        sendBtn.setColorFilter(ContextCompat.getColor(this, R.color.materialGrey));
+        sendBtn.setOnContextClickListener(null);
     }
 }
