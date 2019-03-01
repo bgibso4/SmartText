@@ -2,6 +2,7 @@ package com.example.ben.smarttext;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 
@@ -9,9 +10,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
+
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -28,11 +32,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -48,8 +54,15 @@ public class MainActivity extends AppCompatActivity {
     LinearLayoutManager messageLayoutManager;
     MessageLayoutAdapter messageAdapter;
     SharedPreferences pref;
+    private List<Contact> contacts;
+    private boolean contactsPermissonCheck;
+    PendingIntent sentPI;
+    PendingIntent deliveredPI;
+    BroadcastReceiver sendBroadcastReceiver;
+    BroadcastReceiver deliveredBroadcastReceiver;
+    String  SENT = "SMS_SENT";
+    String  DELIVERED = "SMS_DELIVERED";
     SwipeController swipeController;
-    boolean contactsPermissonCheck;
     String[] PERMISSIONS = {
         Manifest.permission.SEND_SMS,
         Manifest.permission.READ_CONTACTS,
@@ -118,11 +131,71 @@ public class MainActivity extends AppCompatActivity {
         Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
         boolean alarmRunning = (PendingIntent.getBroadcast(context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
 
-        if(!alarmRunning) {
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarm, 0);
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
-        }
+
+
+        //---when the SMS has been sent---
+
+        sendBroadcastReceiver = new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context arg0, Intent arg1) {
+                switch (getResultCode())
+                {
+                    case Activity.RESULT_OK:
+                        Toast.makeText(context, "SMS sent",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                        Toast.makeText(context, "Generic failure",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_NO_SERVICE:
+                        Toast.makeText(context, "No service",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_NULL_PDU:
+                        Toast.makeText(context, "Null PDU",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_RADIO_OFF:
+                        Toast.makeText(context, "Radio off",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        };
+        registerReceiver(sendBroadcastReceiver, new IntentFilter(SENT));
+
+        //---when the SMS has been delivered---
+
+        deliveredBroadcastReceiver = new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context arg0, Intent arg1) {
+                switch (getResultCode())
+                {
+                    case Activity.RESULT_OK:
+                        Toast.makeText(context, "SMS delivered",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Toast.makeText(context, "SMS not delivered",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        };
+
+        registerReceiver(deliveredBroadcastReceiver, new IntentFilter(DELIVERED));
+
+        //TODO: Instead of sending all of the texts that didnt send before maybe just delete them?
+        SendTexts();
+
+//        Intent alarm = new Intent(this.context, MessageSenderRestartReceiver.class);
+//        boolean alarmRunning = (PendingIntent.getBroadcast(this.context, 0, alarm, PendingIntent.FLAG_NO_CREATE) != null);
+//        if(!alarmRunning) {
+//            PendingIntent pendingIntent = PendingIntent.getBroadcast(this.context, 0, alarm, 0);
+//            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+//            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1800, pendingIntent);
+//        }
 
         createTextBtn.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, CreateNewText.class));
@@ -146,7 +219,10 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 handler.post(() -> {
                     try {
-                        SendTexts();
+                        //SendTexts();
+                        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+                        List<TextMessage> texts = textMessageDAO.getMessages();
+                        texts.sort(TextMessage::compareTo);
                         messageAdapter.notifyDataSetChanged();
                         String pendingMessage = "Pending Messages ("+texts.size()+")";
                         pendingMessageTitle.setText(pendingMessage);
@@ -179,7 +255,6 @@ public class MainActivity extends AppCompatActivity {
                 //pendingMessageView.removeViewAt(index);
                 textMessageDAO.delete(t);
                 allMessages.remove(index);
-
                 messageAdapter.dataSet.clear();
                 messageAdapter.notifyDataSetChanged();
                 messageAdapter.dataSet.addAll(allMessages);
@@ -191,6 +266,17 @@ public class MainActivity extends AppCompatActivity {
             }
             index++;
         }
+
+        TextMessage nextMessage = textMessageDAO.getNextText();
+        if(nextMessage!=null){
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(nextMessage.getDate());
+            Intent alarm = new Intent(context, MessageSenderRestartReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarm, 0);
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+        }
+
 
     }
 
@@ -204,5 +290,19 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    @Override
+    protected void onPause() {
+        try{
+            unregisterReceiver(sendBroadcastReceiver);
+            unregisterReceiver(deliveredBroadcastReceiver);
+        }catch(IllegalArgumentException e){
+            System.out.print("No receiver is registered");
+        };
+
+        super.onPause();
+
+    }
+
 
 }

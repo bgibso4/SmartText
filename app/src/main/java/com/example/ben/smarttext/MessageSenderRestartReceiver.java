@@ -9,6 +9,8 @@ public class MessageSenderRestartReceiver extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i(MessageSenderRestartReceiver.class.getSimpleName(), "Service has stopped!");
-        context.startService(new Intent(context, SendingService.class));
+        context.startForegroundService(new Intent(context, SendingService.class));
     }
+
+
 }
