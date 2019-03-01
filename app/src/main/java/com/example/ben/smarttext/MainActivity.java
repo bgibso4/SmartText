@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     String  SENT = "SMS_SENT";
     String  DELIVERED = "SMS_DELIVERED";
     SwipeController swipeController;
-    boolean contactsPermissonCheck;
     String[] PERMISSIONS = {
         Manifest.permission.SEND_SMS,
         Manifest.permission.READ_CONTACTS,
