@@ -50,11 +50,15 @@
 
     <View
         android:id="@+id/divider3"
-        android:layout_width="395dp"
+        android:layout_width="wrap_content"
         android:layout_height="1dp"
         android:layout_marginStart="4dp"
         android:layout_marginTop="80dp"
+        android:layout_marginEnd="8dp"
         android:background="#4d4c4c"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

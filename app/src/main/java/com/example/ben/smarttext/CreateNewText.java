@@ -338,6 +338,6 @@ public class CreateNewText extends AppCompatActivity {
     public void DisallowSending(){
         ImageButton sendBtn = findViewById(R.id.sendBtn);
         sendBtn.setColorFilter(ContextCompat.getColor(this, R.color.materialGrey));
-        sendBtn.setOnContextClickListener(null);
+        sendBtn.setOnClickListener(null);
     }
 }

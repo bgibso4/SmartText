@@ -146,7 +146,10 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 handler.post(() -> {
                     try {
-                        SendTexts();
+                        //SendTexts();
+                        TextMessageDAO textMessageDAO = database.getTextMessageDAO();
+                        List<TextMessage> texts = textMessageDAO.getMessages();
+                        texts.sort(TextMessage::compareTo);
                         messageAdapter.notifyDataSetChanged();
                         String pendingMessage = "Pending Messages ("+texts.size()+")";
                         pendingMessageTitle.setText(pendingMessage);
