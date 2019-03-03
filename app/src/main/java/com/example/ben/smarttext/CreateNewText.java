@@ -164,8 +164,8 @@ public class CreateNewText extends AppCompatActivity {
         timeField.setText(currentTime);
         CreateNewText tempThis = this;
 
-        CardView timeCard = this.findViewById(R.id.timeCard);
-        CardView dateCard = this.findViewById(R.id.dateCard);
+        EditText timeCard = this.findViewById(R.id.timeField);
+        EditText dateCard = this.findViewById(R.id.dateField);
 
 
         timeCard.setOnClickListener(view -> {
