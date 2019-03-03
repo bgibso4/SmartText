@@ -219,10 +219,10 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 handler.post(() -> {
                     try {
-                        //SendTexts();
                         TextMessageDAO textMessageDAO = database.getTextMessageDAO();
                         List<TextMessage> texts = textMessageDAO.getMessages();
                         texts.sort(TextMessage::compareTo);
+                        messageAdapter.dataSet = texts;
                         messageAdapter.notifyDataSetChanged();
                         String pendingMessage = "Pending Messages ("+texts.size()+")";
                         pendingMessageTitle.setText(pendingMessage);
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        timer.schedule(doAsynchronousTask, 1000, 10000);
+        timer.schedule(doAsynchronousTask, 1000, 5000);
     }
 
     @Override
@@ -255,12 +255,12 @@ public class MainActivity extends AppCompatActivity {
                 //pendingMessageView.removeViewAt(index);
                 textMessageDAO.delete(t);
                 allMessages.remove(index);
-                messageAdapter.dataSet.clear();
-                messageAdapter.notifyDataSetChanged();
-                messageAdapter.dataSet.addAll(allMessages);
-                messageAdapter.dataSet.sort(TextMessage::compareTo);
+//                messageAdapter.dataSet.clear();
+//                messageAdapter.notifyDataSetChanged();
+//                messageAdapter.dataSet.addAll(allMessages);
+//                messageAdapter.dataSet.sort(TextMessage::compareTo);
                 //messageAdapter.dataSet.remove(index);
-                messageAdapter.notifyDataSetChanged();
+//                messageAdapter.notifyDataSetChanged();
                 //messageAdapter.notifyItemRangeChanged(index, allMessages.size());
                 index--;
             }

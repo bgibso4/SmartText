@@ -155,7 +155,12 @@ public class CreateNewText extends AppCompatActivity {
         if (c.get(Calendar.MINUTE) < 10) {
             minutes = "0" + minutes;
         }
-        this.currentTime = Integer.toString(hour) + " : " + minutes + " " + ampm;
+        String hourString = Integer.toString(hour);
+        if(hour==0){
+            hourString= "12";
+        }
+
+        this.currentTime = hourString + " : " + minutes + " " + ampm;
         timeField.setText(currentTime);
         CreateNewText tempThis = this;
 

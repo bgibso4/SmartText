@@ -1,7 +1,9 @@
 <resources>
 
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar"/>
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:navigationBarColor">#363640</item>
+    </style>
 
     <style name="TextInputStyle" parent="TextAppearance.AppCompat">
         <item name="android:textSize">18sp</item>

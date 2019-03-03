@@ -81,6 +81,9 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
                 hour= i-12;
             }
         }
+        else if(i==0){
+            hour = 12;
+        }
         if(i1<10){
             minuteZero="0";
         }
