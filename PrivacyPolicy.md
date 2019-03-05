@@ -1,3 +1,4 @@
+## Privacy Policy 
 For a better experience, while using our Service, we require SEND_SMS, READ_CONTACTS permissions. 
 This simply allows the app to function as desired. The information that we request will be retained 
 on your device and is not collected by us in any way.
