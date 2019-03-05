@@ -192,9 +192,9 @@
             <EditText
                 android:id="@+id/dateField"
                 android:layout_width="220dp"
-                android:layout_height="55dp"
+                android:layout_height="57dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="35dp"
+                android:layout_marginTop="32dp"
                 android:layout_marginEnd="8dp"
                 android:background="@android:color/transparent"
                 android:ems="10"
@@ -203,7 +203,7 @@
                 android:onClick="HandleDateClick"
                 android:textAlignment="viewEnd"
                 android:textColor="#999999"
-                android:textSize="40sp"
+                android:textSize="50sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
@@ -213,7 +213,7 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="20dp"
         android:text="To:"
         android:textColor="#999999"
@@ -223,24 +223,25 @@
 
     <com.android.ex.chips.RecipientEditTextView
         android:id="@+id/phone_retv"
-        android:layout_width="342dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_weight="1"
         android:hint="Enter phone numbers"
         android:minHeight="58dp"
         android:textColor="@android:color/background_light"
         android:textColorLink="@color/design_default_color_secondary"
+        app:layout_constraintBottom_toBottomOf="@+id/frameLayout3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/frameLayout3" />
 
     <ScrollView
         android:id="@+id/scrollView2"
-        android:layout_width="339dp"
+        android:layout_width="0dp"
         android:layout_height="67dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="4dp"
@@ -248,7 +249,7 @@
         android:elevation="3dp"
         android:maxHeight="90dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/sendBtn"
         app:layout_constraintHorizontal_bias="0.267"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -285,13 +286,16 @@
         android:id="@+id/sendBtn"
         android:layout_width="42dp"
         android:layout_height="42dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="20dp"
         android:background="@android:color/transparent"
         android:elevation="3dp"
         android:tint="@color/materialGrey"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/frameLayout2"
+        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@android:drawable/ic_menu_send" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
