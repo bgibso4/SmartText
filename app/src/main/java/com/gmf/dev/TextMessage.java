@@ -1,24 +1,15 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
-import android.Manifest;
-import android.app.Activity;
 import android.app.PendingIntent;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import android.content.BroadcastReceiver;
+
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.telephony.SmsManager;
-import android.util.Log;
-import android.widget.Toast;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

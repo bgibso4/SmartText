@@ -1,8 +1,7 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
 import android.annotation.SuppressLint;
 
-import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.room.Room;
 
@@ -20,11 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Path;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -33,7 +28,6 @@ import android.widget.ImageButton;
 import android.widget.MultiAutoCompleteTextView;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 public class CreateNewText extends AppCompatActivity {
 

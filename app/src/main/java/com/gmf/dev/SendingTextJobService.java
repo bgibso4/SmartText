@@ -1,4 +1,4 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;

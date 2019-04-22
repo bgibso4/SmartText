@@ -1,9 +1,8 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.net.Uri;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class MessageLayoutAdapter extends RecyclerView.Adapter<MessageLayoutAdapter.MessageViewHolder> {
 

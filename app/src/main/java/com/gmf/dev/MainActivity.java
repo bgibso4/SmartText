@@ -1,4 +1,4 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -12,37 +12,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Canvas;
-import android.os.Build;
 import android.os.Looper;
-import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.os.Handler;
-import android.os.SystemClock;
-import androidx.annotation.NonNull;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.telephony.SmsManager;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.gson.Gson;
-import java.util.ArrayList;
+
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -65,8 +55,7 @@ public class MainActivity extends AppCompatActivity {
     SwipeController swipeController;
     String[] PERMISSIONS = {
         Manifest.permission.SEND_SMS,
-        Manifest.permission.READ_CONTACTS,
-        Manifest.permission.READ_PHONE_STATE
+        Manifest.permission.READ_CONTACTS
     };
 
     // Request code for READ_CONTACTS. It can be any number > 0.

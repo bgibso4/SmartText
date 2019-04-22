@@ -1,4 +1,4 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
 import org.junit.Test;
 

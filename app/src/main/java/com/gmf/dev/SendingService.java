@@ -1,4 +1,4 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -16,7 +16,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.SystemClock;
+
 import androidx.annotation.Nullable;
 
 import android.content.Context;

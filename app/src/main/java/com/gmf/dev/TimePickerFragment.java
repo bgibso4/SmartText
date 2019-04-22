@@ -1,4 +1,4 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;

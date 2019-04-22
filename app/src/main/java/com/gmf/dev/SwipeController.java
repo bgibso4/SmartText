@@ -1,4 +1,4 @@
-package com.example.ben.smarttext;
+package com.gmf.dev;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
